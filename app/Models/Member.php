@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Member extends Model
 {
@@ -41,5 +42,9 @@ class Member extends Model
                ($this->suffix ? $this->suffix : ''));
     }
 
+    public function memberServices(): HasMany
+    {
+        return $this->hasMany(MemberServices::class);
+    }
 
 }

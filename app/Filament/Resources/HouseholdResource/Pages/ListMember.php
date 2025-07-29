@@ -4,9 +4,15 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
+use Filament\Support\Colors\Color;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\IconColumn\IconColumnSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -60,6 +66,14 @@ class ListMember extends ManageRelatedRecords
     {
         return $table
             ->columns([
+                IconColumn::make('is_leader')
+                    ->label('   ')
+                    ->size(IconColumnSize::Medium)
+                    ->trueIcon('fas-crown')
+                    ->state(function($record) {
+                        return $record->is_leader ? 'fas-crown' : '';
+                    })
+                    ->color(Color::Amber),
                 TextColumn::make('full_name')
                     ->label('Name')
                     ->searchable(),
@@ -69,17 +83,36 @@ class ListMember extends ManageRelatedRecords
                 TextColumn::make('cluster_no')
                     ->label('Cluster No.')
                     ->searchable(),
-                ToggleColumn::make('is_leader')
-                    ->label('Leader')
-                    ->sortable()
-                    ->afterStateUpdated(function ($record, $state) {
-                        if ($state) {
+            ])
+            ->actions([
+                ActionGroup::make([
+                    Action::make('is_leader')
+                        ->label('Set as Leader')
+                        ->hidden(fn($record) => $record->is_leader)
+                        ->icon('fas-crown')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
                             $record->household->members()
                                 ->where('id', '!=', $record->id)
                                 ->update(['is_leader' => false]);
-                        }
-                    }),
-            ]);
+                            $record->update(['is_leader' => true]);
+                        }),
+                    EditAction::make('edit')
+                        ->icon('heroicon-o-pencil')
+                        ->form(AddMember::form())
+                        ->modalWidth(MaxWidth::Large)
+                        ->slideOver(),
+                    Action::make('delete')
+                        ->icon('heroicon-o-trash')
+                        ->requiresConfirmation()
+                        ->action(fn($record) => $record->delete())
+                        ->successNotificationTitle('Member deleted successfully'),
+                ])
+            ])
+            // ->recordClasses(function ($record) {
+            //     return $record->is_leader ? '!bg-amber-500 hover:!amber-400' : '';
+            // })
+            ;
     }
 }
 

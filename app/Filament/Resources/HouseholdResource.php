@@ -6,8 +6,10 @@ use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
+use App\Models\Service;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -68,8 +70,17 @@ class HouseholdResource extends Resource
                             ->schema([
                                 Repeater::make('members')
                                     ->relationship('members')
-                                    ->schema(AddMember::form())
-                                    ->columns(3)
+                                    ->schema([
+                                        ...AddMember::form(),
+                                        Select::make('member_service')
+                                            ->label('Services')
+                                            ->multiple()
+                                            ->preload()
+                                            ->columnSpan(2)
+                                            ->searchable()
+                                            ->options(fn() => Service::all()->pluck('name', 'id')),
+                                        ])
+                                    ->columns(4)
                                     ->columnSpanFull()
                                     ->defaultItems(1)
                                     ->collapsible()

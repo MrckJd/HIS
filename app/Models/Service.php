@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Service extends Model
 {
@@ -12,4 +13,9 @@ class Service extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function memberServices(): HasMany
+    {
+        return $this->hasMany(MemberServices::class);
+    }
 }

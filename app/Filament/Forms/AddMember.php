@@ -9,20 +9,10 @@ class AddMember
     public static function form(): array
     {
         return [
-            Forms\Components\Select::make('role')
-                ->options([
-                    'Head' => 'Head of Household',
-                    'Spouse' => 'Spouse',
-                    'Child' => 'Child',
-                    'Parent' => 'Parent',
-                    'Sibling' => 'Sibling',
-                    'Other' => 'Other Relative',
-                ])
-                ->required(),
-            Forms\Components\TextInput::make('surname')
+            Forms\Components\TextInput::make('first_name')
                 ->required()
                 ->maxLength(255),
-            Forms\Components\TextInput::make('first_name')
+            Forms\Components\TextInput::make('surname')
                 ->required()
                 ->maxLength(255),
             Forms\Components\TextInput::make('middle_name')
@@ -35,6 +25,16 @@ class AddMember
                 ->options([
                     'Male' => 'Male',
                     'Female' => 'Female',
+                ])
+                ->required(),
+            Forms\Components\Select::make('role')
+                ->options([
+                    'Head' => 'Head of Household',
+                    'Spouse' => 'Spouse',
+                    'Child' => 'Child',
+                    'Parent' => 'Parent',
+                    'Sibling' => 'Sibling',
+                    'Other' => 'Other Relative',
                 ])
                 ->required(),
             Forms\Components\TextInput::make('precinct_no')
