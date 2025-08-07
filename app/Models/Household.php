@@ -20,7 +20,8 @@ class Household extends Model
 
     public function members(): HasMany
     {
-        return $this->hasMany(Member::class);
+        return $this->hasMany(Member::class)
+            ->orderBy('is_leader', 'desc');
     }
 
     public function leader(): HasOne
