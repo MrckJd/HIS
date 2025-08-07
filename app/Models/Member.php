@@ -36,9 +36,9 @@ class Member extends Model
 
     public function getFullNameAttribute(): string
     {
-    return trim($this->first_name . ' ' .
+    return trim($this->surname . ', ' .
+                $this->first_name . ' ' .
                ($this->middle_name ? $this->middle_name . ' ' : '') .
-               $this->surname . ' ' .
                ($this->suffix ? $this->suffix : ''));
     }
 

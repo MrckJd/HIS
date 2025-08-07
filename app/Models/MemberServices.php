@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 class MemberServices extends Model
 {
     use HasUlids;
@@ -17,6 +15,18 @@ class MemberServices extends Model
         'user_id',
         'date_recieved',
     ];
+
+
+    protected $casts = [
+        'date_recieved' => 'date',
+    ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->user_id = auth()->id();
+        });
+    }
 
     public function member(): BelongsTo
     {

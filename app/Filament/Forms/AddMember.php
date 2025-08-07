@@ -11,9 +11,11 @@ class AddMember
         return [
             Forms\Components\TextInput::make('first_name')
                 ->required()
+                ->live()
                 ->maxLength(255),
             Forms\Components\TextInput::make('surname')
                 ->required()
+                ->live()
                 ->maxLength(255),
             Forms\Components\TextInput::make('middle_name')
                 ->maxLength(255),

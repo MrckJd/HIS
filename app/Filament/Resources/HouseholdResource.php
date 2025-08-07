@@ -8,6 +8,7 @@ use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use App\Models\Service;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
@@ -17,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 
 class HouseholdResource extends Resource
 {
@@ -65,26 +67,36 @@ class HouseholdResource extends Resource
                                 Forms\Components\TextInput::make('purok')
                                     ->required()
                                     ->maxLength(255),
-                                            ]),
+                            ]),
+
                         Tab::make('Member')
                             ->schema([
                                 Repeater::make('members')
                                     ->relationship('members')
+                                    ->columnspanFull()
+                                    ->collapsible()
+                                    ->itemLabel(fn($state) => $state['first_name'] . ' ' . $state['surname'])
+                                    ->columns(3)
                                     ->schema([
                                         ...AddMember::form(),
-                                        Select::make('member_service')
-                                            ->label('Services')
-                                            ->multiple()
-                                            ->preload()
-                                            ->columnSpan(2)
-                                            ->searchable()
-                                            ->options(fn() => Service::all()->pluck('name', 'id')),
-                                        ])
-                                    ->columns(4)
-                                    ->columnSpanFull()
-                                    ->defaultItems(1)
-                                    ->collapsible()
-                                    ->addActionLabel('Add Member')
+                                        TableRepeater::make('member_services')
+                                                ->relationship('memberServices')
+                                                ->columnSpanFull()
+                                                ->defaultItems(1)
+                                                ->grid(3)
+                                                ->columns(3)
+                                                ->schema([
+                                                    Select::make('service_id')
+                                                        ->label('Service')
+                                                        ->unique()
+                                                        ->options(Service::all()->pluck('name', 'id'))
+                                                        ->searchable()
+                                                        ->required(),
+                                                    DatePicker::make('date_recieved')
+                                                        ->label('Date Received')
+                                                        ->required(),
+                                                ]),
+                                    ])
                             ]),
                     ])
             ]);
@@ -97,8 +109,7 @@ class HouseholdResource extends Resource
                 TextColumn::make('title')
                     ->searchable(),
                 TextColumn::make('leader_name')
-                    ->label('Leader')
-                    ->sortable(),
+                    ->label('Leader'),
                 TextColumn::make('address')
                     ->label('Complete Address')
                     ->state(fn( $record) => $record->purok . ', ' . PSGCService::getBarangayName($record->baranggay, $record->municipality) . ', ' . PSGCService::getMunicipalityName($record->municipality)),

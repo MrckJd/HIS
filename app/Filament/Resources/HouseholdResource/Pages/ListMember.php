@@ -4,8 +4,14 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
+use App\Models\Service;
 use Filament\Support\Colors\Color;
 use Filament\Actions;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
@@ -14,8 +20,9 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\IconColumn\IconColumnSize;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
+use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 
 class ListMember extends ManageRelatedRecords
 {
@@ -36,10 +43,53 @@ class ListMember extends ManageRelatedRecords
                 ->url(HouseholdResource::getUrl()),
             Actions\Action::make('members')
                 ->label('Add Member')
+                ->icon('heroicon-o-user-plus')
                 ->successNotificationTitle('Member added successfully')
-                ->slideOver()
-                ->form(AddMember::form())
-                ->modalWidth(MaxWidth::Large)
+                ->form([
+                    Tabs::make('Member Details')
+                                ->contained(false)
+                                ->tabs([
+                                    Tab::make('Personal Info')
+                                        ->columns(3)
+                                        ->schema(AddMember::form()),
+                                    Tab::make('Services')
+                                        ->schema([
+                                            TableRepeater::make('members.member_services')
+                                                ->columnSpanFull()
+                                                ->defaultItems(1)
+                                                ->grid(3)
+                                                ->schema([
+                                                    Select::make('service_id')
+                                                        ->label('Service')
+                                                        ->options(function($get) {
+                                                            // Get all selected service IDs from other rows
+                                                            $allSelectedServices = collect($get('../../members.member_services'))
+                                                                ->pluck('service_id')
+                                                                ->filter()
+                                                                ->toArray();
+
+                                                            // Get current row's service ID
+                                                            $currentServiceId = $get('service_id');
+
+                                                            // Remove current row's service from the excluded list
+                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
+
+                                                            // Return services that are not selected in other rows
+                                                            return Service::whereNotIn('id', $excludedServices)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray();
+                                                        })
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->required(),
+                                                    DatePicker::make('date_recieved')
+                                                        ->label('Date Received')
+                                                        ->required(),
+                                                ]),
+                                        ]),
+                                ]),
+                ])
+                ->modalWidth(MaxWidth::FourExtraLarge)
                 ->action(fn($record,$data)=> $record->members()->create($data)),
         ];
     }
@@ -67,7 +117,7 @@ class ListMember extends ManageRelatedRecords
         return $table
             ->columns([
                 IconColumn::make('is_leader')
-                    ->label('   ')
+                    ->label('')
                     ->size(IconColumnSize::Medium)
                     ->trueIcon('fas-crown')
                     ->state(function($record) {
@@ -76,13 +126,34 @@ class ListMember extends ManageRelatedRecords
                     ->color(Color::Amber),
                 TextColumn::make('full_name')
                     ->label('Name')
-                    ->searchable(),
+                    ->searchable(['surname', 'first_name', 'middle_name', 'suffix'])
+                    ->sortable(fn($query) => $query)
+                    ->sortable(query: function ($query, $direction) {
+                        return $query
+                            ->orderBy('surname', $direction)
+                            ->orderBy('first_name', $direction)
+                            ->orderBy('middle_name', $direction)
+                            ->orderBy('suffix', $direction);
+                    }),
                 TextColumn::make('precinct_no')
                     ->label('Precinct No.')
-                    ->searchable(),
+                    ->sortable()
+                    ->default('N/A')
+                    ->badge(fn($record) => $record->precinct_no ? true : false)
+                    ->color(fn($record) => $record->precinct_no ? 'danger' : ''),
                 TextColumn::make('cluster_no')
                     ->label('Cluster No.')
-                    ->searchable(),
+                    ->sortable()
+                    ->color(fn($record) => $record->cluster_no ? 'danger' : '')
+                    ->default('N/A')
+                    ->badge(fn($record) => $record->cluster_no ? true : false),
+                TextColumn::make('member_services_count')
+                    ->counts('memberServices')
+                    ->label('Services Availed')
+                    ->badge(fn($record) => $record->memberServices->count() > 0)
+                    ->color(fn($record) => $record->memberServices->count() > 0 ? 'success' : '')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => $state > 0 ? $state : 'N/A'),
             ])
             ->actions([
                 ActionGroup::make([
@@ -99,20 +170,60 @@ class ListMember extends ManageRelatedRecords
                         }),
                     EditAction::make('edit')
                         ->icon('heroicon-o-pencil')
-                        ->form(AddMember::form())
-                        ->modalWidth(MaxWidth::Large)
-                        ->slideOver(),
+                        ->modalWidth(MaxWidth::FourExtraLarge)
+                        ->form([
+                            Tabs::make('Member Details')
+                                ->contained(false)
+                                ->tabs([
+                                    Tab::make('Personal Info')
+                                        ->columns(3)
+                                        ->schema(AddMember::form()),
+                                    Tab::make('Services')
+                                        ->schema([
+                                            TableRepeater::make('member_services')
+                                                ->relationship('memberServices')
+                                                ->columnSpanFull()
+                                                ->defaultItems(1)
+                                                ->grid(3)
+                                                ->columns(3)
+                                                ->schema([
+                                                    Select::make('service_id')
+                                                        ->label('Service')
+                                                        ->options(function($get) {
+                                                            // Get all selected service IDs from other rows
+                                                            $allSelectedServices = collect($get('../../member_services'))
+                                                                ->pluck('service_id')
+                                                                ->filter()
+                                                                ->toArray();
+
+                                                            // Get current row's service ID
+                                                            $currentServiceId = $get('service_id');
+
+                                                            // Remove current row's service from the excluded list
+                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
+
+                                                            // Return services that are not selected in other rows
+                                                            return Service::whereNotIn('id', $excludedServices)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray();
+                                                        })
+                                                        ->live()
+                                                        ->searchable()
+                                                        ->required(),
+                                                    DatePicker::make('date_recieved')
+                                                        ->label('Date Received')
+                                                        ->required(),
+                                                ]),
+                                        ]),
+                                ]),
+                            ]),
                     Action::make('delete')
                         ->icon('heroicon-o-trash')
                         ->requiresConfirmation()
                         ->action(fn($record) => $record->delete())
                         ->successNotificationTitle('Member deleted successfully'),
                 ])
-            ])
-            // ->recordClasses(function ($record) {
-            //     return $record->is_leader ? '!bg-amber-500 hover:!amber-400' : '';
-            // })
-            ;
+            ]);
     }
 }
 
