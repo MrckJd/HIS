@@ -13,12 +13,12 @@ class MemberServices extends Model
         'member_id',
         'service_id',
         'user_id',
-        'date_recieved',
+        'date_received',
     ];
 
 
     protected $casts = [
-        'date_recieved' => 'date',
+        'date_received' => 'date',
     ];
 
     protected static function booted()
