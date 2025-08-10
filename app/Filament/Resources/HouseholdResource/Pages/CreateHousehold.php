@@ -22,6 +22,8 @@ class CreateHousehold extends CreateRecord
 
     public function handleRecordCreation($data): Model
     {
+
+        $data['address'] = $data['purok'] . ', ' . PSGCService::getBarangayName($data['baranggay'], $data['municipality']) . ', ' . PSGCService::getMunicipalityName($data['municipality']);
         $household = Household::create($data);
 
         if (isset($data['members'])) {
@@ -42,4 +44,6 @@ class CreateHousehold extends CreateRecord
 
         return $household;
     }
+
+
 }

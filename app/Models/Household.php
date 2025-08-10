@@ -16,6 +16,7 @@ class Household extends Model
         'municipality',
         'baranggay',
         'purok',
+        'address',
     ];
 
     public function members(): HasMany

@@ -61,7 +61,6 @@ class HouseholdResource extends Resource
                                         if (!$municipality) {
                                             return [];
                                         }
-
                                         return PSGCService::getBarangays($municipality);
                                     }),
                                 Forms\Components\TextInput::make('purok')
@@ -79,24 +78,8 @@ class HouseholdResource extends Resource
                                     ->columns(3)
                                     ->schema([
                                         ...AddMember::form(),
-                                        TableRepeater::make('member_services')
-                                                ->relationship('memberServices')
-                                                ->columnSpanFull()
-                                                ->defaultItems(1)
-                                                ->grid(3)
-                                                ->columns(3)
-                                                ->schema([
-                                                    Select::make('service_id')
-                                                        ->label('Service')
-                                                        ->unique()
-                                                        ->options(Service::all()->pluck('name', 'id'))
-                                                        ->searchable()
-                                                        ->required(),
-                                                    DatePicker::make('date_recieved')
-                                                        ->label('Date Received')
-                                                        ->required(),
-                                                ]),
-                                    ])
+                                        ...AddMember::memberServicesForm(),
+                                    ]),
                             ]),
                     ])
             ]);
@@ -111,8 +94,7 @@ class HouseholdResource extends Resource
                 TextColumn::make('leader_name')
                     ->label('Leader'),
                 TextColumn::make('address')
-                    ->label('Complete Address')
-                    ->state(fn( $record) => $record->purok . ', ' . PSGCService::getBarangayName($record->baranggay, $record->municipality) . ', ' . PSGCService::getMunicipalityName($record->municipality)),
+                    ->label('Complete Address'),
                 TextColumn::make('members_count')
                     ->label('Members')
                     ->counts('members')

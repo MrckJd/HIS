@@ -4,6 +4,7 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
+use App\Models\Household;
 use App\Models\Service;
 use Filament\Support\Colors\Color;
 use Filament\Actions;
@@ -53,40 +54,8 @@ class ListMember extends ManageRelatedRecords
                                         ->columns(3)
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
-                                        ->schema([
-                                            TableRepeater::make('members.member_services')
-                                                ->columnSpanFull()
-                                                ->defaultItems(1)
-                                                ->grid(3)
-                                                ->schema([
-                                                    Select::make('service_id')
-                                                        ->label('Service')
-                                                        ->options(function($get) {
-                                                            // Get all selected service IDs from other rows
-                                                            $allSelectedServices = collect($get('../../members.member_services'))
-                                                                ->pluck('service_id')
-                                                                ->filter()
-                                                                ->toArray();
-
-                                                            // Get current row's service ID
-                                                            $currentServiceId = $get('service_id');
-
-                                                            // Remove current row's service from the excluded list
-                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
-
-                                                            // Return services that are not selected in other rows
-                                                            return Service::whereNotIn('id', $excludedServices)
-                                                                ->pluck('name', 'id')
-                                                                ->toArray();
-                                                        })
-                                                        ->live()
-                                                        ->searchable()
-                                                        ->required(),
-                                                    DatePicker::make('date_recieved')
-                                                        ->label('Date Received')
-                                                        ->required(),
-                                                ]),
-                                        ]),
+                                        ->model(Household::class)
+                                        ->schema(AddMember::memberServicesForm()),
                                 ]),
                 ])
                 ->modalWidth(MaxWidth::FourExtraLarge)
@@ -180,29 +149,20 @@ class ListMember extends ManageRelatedRecords
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
                                         ->schema([
-                                            TableRepeater::make('member_services')
-                                                ->relationship('memberServices')
+                                            TableRepeater::make('members.member_services')
                                                 ->columnSpanFull()
                                                 ->defaultItems(1)
                                                 ->grid(3)
-                                                ->columns(3)
                                                 ->schema([
                                                     Select::make('service_id')
                                                         ->label('Service')
                                                         ->options(function($get) {
-                                                            // Get all selected service IDs from other rows
-                                                            $allSelectedServices = collect($get('../../member_services'))
+                                                            $allSelectedServices = collect($get('../../members.member_services'))
                                                                 ->pluck('service_id')
                                                                 ->filter()
                                                                 ->toArray();
-
-                                                            // Get current row's service ID
                                                             $currentServiceId = $get('service_id');
-
-                                                            // Remove current row's service from the excluded list
                                                             $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
-
-                                                            // Return services that are not selected in other rows
                                                             return Service::whereNotIn('id', $excludedServices)
                                                                 ->pluck('name', 'id')
                                                                 ->toArray();
@@ -210,10 +170,10 @@ class ListMember extends ManageRelatedRecords
                                                         ->live()
                                                         ->searchable()
                                                         ->required(),
-                                                    DatePicker::make('date_recieved')
+                                                    DatePicker::make('date_received')
                                                         ->label('Date Received')
                                                         ->required(),
-                                                ]),
+                                            ]),
                                         ]),
                                 ]),
                             ]),

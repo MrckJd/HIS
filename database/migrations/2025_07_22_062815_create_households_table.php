@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('municipality');
             $table->string('baranggay');
             $table->string('purok');
+            $table->string('address')->nullable();
             $table->timestamps();
         });
     }
