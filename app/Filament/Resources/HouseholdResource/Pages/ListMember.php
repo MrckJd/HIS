@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\HouseholdResource\Pages;
 
+use App\Filament\Actions\BackAction;
+use App\Filament\Actions\Table\IsLeaderAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Household;
@@ -22,7 +24,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\IconColumn\IconColumnSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Icetalker\FilamentTableRepeatableEntry\Infolists\Components\TableRepeatableEntry;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 
 class ListMember extends ManageRelatedRecords
@@ -35,13 +36,16 @@ class ListMember extends ManageRelatedRecords
 
     protected static bool $canCreateAnother = false;
 
+    public function mount($record):void
+    {
+        parent::mount($record);
+
+        $this->previousUrl = HouseholdResource::getUrl();
+    }
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('back')
-                ->icon('heroicon-o-arrow-left')
-                ->color('gray')
-                ->url(HouseholdResource::getUrl()),
+            BackAction::make()->url($this->previousUrl),
             Actions\Action::make('members')
                 ->label('Add Member')
                 ->icon('heroicon-o-user-plus')
@@ -54,12 +58,33 @@ class ListMember extends ManageRelatedRecords
                                         ->columns(3)
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
-                                        ->model(Household::class)
-                                        ->schema(AddMember::memberServicesForm()),
-                                ]),
-                ])
-                ->modalWidth(MaxWidth::FourExtraLarge)
-                ->action(fn($record,$data)=> $record->members()->create($data)),
+                                        ->schema([TableRepeater::make('memberServices')
+                                                ->columnSpanFull()
+                                                ->defaultItems(1)
+                                                ->grid(3)
+                                                ->schema([
+                                                    Select::make('service_id')
+                                                        ->label('Service')
+                                                        ->options(function($get) {
+                                                            $allSelectedServices = collect($get('../../members.member_services'))
+                                                                ->pluck('service_id')
+                                                                ->filter()
+                                                                ->toArray();
+                                                            $currentServiceId = $get('service_id');
+                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
+                                                            return Service::whereNotIn('id', $excludedServices)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray();
+                                                        })
+                                                        ->live()
+                                                        ->searchable(),
+                                                    DatePicker::make('date_received')
+                                                        ->label('Date Received'),
+                                                ]),]),
+                                                                ]),
+                                ])
+                                ->modalWidth(MaxWidth::FourExtraLarge)
+                                ->action(fn($record,$data)=> $record->members()->create($data)),
         ];
     }
 
@@ -126,17 +151,7 @@ class ListMember extends ManageRelatedRecords
             ])
             ->actions([
                 ActionGroup::make([
-                    Action::make('is_leader')
-                        ->label('Set as Leader')
-                        ->hidden(fn($record) => $record->is_leader)
-                        ->icon('fas-crown')
-                        ->requiresConfirmation()
-                        ->action(function ($record) {
-                            $record->household->members()
-                                ->where('id', '!=', $record->id)
-                                ->update(['is_leader' => false]);
-                            $record->update(['is_leader' => true]);
-                        }),
+                    IsLeaderAction::make(),
                     EditAction::make('edit')
                         ->icon('heroicon-o-pencil')
                         ->modalWidth(MaxWidth::FourExtraLarge)
@@ -149,7 +164,8 @@ class ListMember extends ManageRelatedRecords
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
                                         ->schema([
-                                            TableRepeater::make('members.member_services')
+                                            TableRepeater::make('members.memberServices')
+                                                ->relationship('memberServices')
                                                 ->columnSpanFull()
                                                 ->defaultItems(1)
                                                 ->grid(3)

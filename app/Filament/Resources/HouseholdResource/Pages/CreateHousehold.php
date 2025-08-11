@@ -6,11 +6,6 @@ use App\Filament\Resources\HouseholdResource;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use App\Models\MemberServices;
-use Filament\Actions;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Form;
-use Filament\Forms;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,7 +18,7 @@ class CreateHousehold extends CreateRecord
     public function handleRecordCreation($data): Model
     {
 
-        $data['address'] = $data['purok'] . ', ' . PSGCService::getBarangayName($data['baranggay'], $data['municipality']) . ', ' . PSGCService::getMunicipalityName($data['municipality']);
+
         $household = Household::create($data);
 
         if (isset($data['members'])) {
@@ -31,18 +26,26 @@ class CreateHousehold extends CreateRecord
                 $memberData['household_id'] = $household->id;
                 $member = $household->members()->create($memberData);
 
-                if (isset($memberData['services'])) {
-                    foreach ($memberData['services'] as $service) {
+                if (isset($memberData['memberServices'])) {
+                    foreach ($memberData['memberServices'] as $service) {
                         MemberServices::create([
                             'member_id' => $member->id,
-                            'service_id' => $service,
+                            'service_id' => $service['service_id'],
+                            'date_received' => $service['date_received'],
                         ]);
                     }
                 }
             }
         }
 
+
         return $household;
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['address'] = $data['purok'] . ', ' . PSGCService::getBarangayName($data['baranggay'], $data['municipality']) . ', ' . PSGCService::getMunicipalityName($data['municipality']);
+        return $data;
     }
 
 

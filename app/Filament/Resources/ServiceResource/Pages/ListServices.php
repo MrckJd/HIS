@@ -28,14 +28,6 @@ class ListServices extends ListRecords
                     'name' => TextInput::make('name')
                         ->required()
                         ->maxLength(255),
-                    'description123' => Select::make('description123')
-                        ->options([
-                            'Health' => 'q21312',
-                            'Education' => 'adwbda',
-                            'Financial' => 'Financial',
-                            'Social' => 'Social',
-                        ])
-                        ->required()
                 ])
                 ->action(fn(Service $service, $data) => $service->create($data))
                 ->sendSuccessNotification()

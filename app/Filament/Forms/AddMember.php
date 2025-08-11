@@ -55,7 +55,7 @@ class AddMember
     public static function memberServicesForm(): array
     {
         return [
-            TableRepeater::make('members.member_services')
+            TableRepeater::make('memberServices')
                 ->columnSpanFull()
                 ->defaultItems(1)
                 ->grid(3)

@@ -26,14 +26,6 @@ class ServiceResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('description123')
-                    ->options([
-                        'Health' => '123123',
-                        'Education' => 'Education',
-                        'Financial' => 'Financial',
-                        'Social' => 'Social',
-                    ])
-                    ->required(),
             ]);
     }
 

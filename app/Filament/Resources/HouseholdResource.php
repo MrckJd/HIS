@@ -71,7 +71,6 @@ class HouseholdResource extends Resource
                         Tab::make('Member')
                             ->schema([
                                 Repeater::make('members')
-                                    ->relationship('members')
                                     ->columnspanFull()
                                     ->collapsible()
                                     ->itemLabel(fn($state) => $state['first_name'] . ' ' . $state['surname'])

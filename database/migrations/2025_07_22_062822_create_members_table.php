@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('precinct_no')->nullable();
             $table->string('cluster_no')->nullable();
             $table->foreignUlid('household_id')->constrained('households')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->boolean('is_leader');
+            $table->boolean('is_leader')->nullable();
             $table->timestamps();
         });
     }
