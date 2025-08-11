@@ -152,6 +152,10 @@ class ListMember extends ManageRelatedRecords
             ->actions([
                 ActionGroup::make([
                     IsLeaderAction::make(),
+                    Action::make('viewId')
+                        ->icon('heroicon-o-eye')
+                        ->closeModalByClickingAway(false)
+                        ->modalContent(fn($record) => view('filament.modal.idModal', ['member' => $record])),
                     EditAction::make('edit')
                         ->icon('heroicon-o-pencil')
                         ->modalWidth(MaxWidth::FourExtraLarge)
