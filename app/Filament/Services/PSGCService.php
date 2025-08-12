@@ -90,4 +90,11 @@ class PSGCService
         Cache::forget("barangays_{$municipalityCode}");
         Cache::forget("barangays_data_{$municipalityCode}");
     }
+
+    //get municipality code
+    public static function getMunicipalityCode(string $municipalityName, string $provinceCode = '112400000'): ?string
+    {
+        $municipalities = self::getMunicipalities($provinceCode);
+        return array_search($municipalityName, $municipalities) ?: null;
+    }
 }
