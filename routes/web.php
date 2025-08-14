@@ -19,7 +19,8 @@ Route::get('/test-puppeteer-pdf', function () {
             ->format('a4')
             ->withBrowsershot(fn (Browsershot $bs) => $bs->noSandbox()->setDelay(2000)
                     ->timeout(60)
-                    ->showBackground())
+                    ->showBackground()
+            )
             ->name('test.pdf');
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()]);
