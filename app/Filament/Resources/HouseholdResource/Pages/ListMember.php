@@ -6,11 +6,9 @@ use App\Filament\Actions\BackAction;
 use App\Filament\Actions\Table\IsLeaderAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
-use App\Models\Household;
 use App\Models\Service;
 use Filament\Support\Colors\Color;
 use Filament\Actions;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
@@ -19,12 +17,14 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\IconColumn\IconColumnSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ListMember extends ManageRelatedRecords
 {
@@ -101,7 +101,7 @@ class ListMember extends ManageRelatedRecords
             return $title . ' (No Leader)';
         }
 
-        $leaderName = $leader->first()->first_name . ' ' . ($leader->first()->middle_name ? $leader->first()->middle_name : '') . ' ' . $leader->first()->surname . ' ' . ($leader->first()->suffix ? $leader->first()->suffix : '');
+        $leaderName = $leader->first()->first_name . ' ' . ($leader->first()->middle_name ? substr($leader->first()->middle_name, 0, 1) . '. ' : '') . $leader->first()->surname . ' ' . ($leader->first()->suffix ? $leader->first()->suffix : '');
 
         return $title . ' (' . $leaderName . ')';
     }
@@ -149,13 +149,22 @@ class ListMember extends ManageRelatedRecords
                     ->sortable()
                     ->formatStateUsing(fn($state) => $state > 0 ? $state : 'N/A'),
             ])
+            ->bulkActions([
+                BulkAction::make('mark_selected')
+                ->label('Generate ID')
+                ->icon('heroicon-o-identification')
+                ->action(function ($records){
+                    dd($records);
+                }),
+            ])
             ->actions([
+                Action::make('viewId')
+                    ->icon('heroicon-o-eye')
+                    ->modalWidth(MaxWidth::FitContent)
+                    ->closeModalByClickingAway(false)
+                    ->modalContent(fn($record) => view('filament.modal.idModal', ['member' => $record], ['qrCode' => QrCode::size(150)->generate($record->code ? $record->code : ' No QR')])),
                 ActionGroup::make([
                     IsLeaderAction::make(),
-                    Action::make('viewId')
-                        ->icon('heroicon-o-eye')
-                        ->closeModalByClickingAway(false)
-                        ->modalContent(fn($record) => view('filament.modal.idModal', ['member' => $record])),
                     EditAction::make('edit')
                         ->icon('heroicon-o-pencil')
                         ->modalWidth(MaxWidth::FourExtraLarge)

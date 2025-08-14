@@ -13,6 +13,7 @@ class Member extends Model
 
     protected $fillable = [
         'household_id',
+        'code',
         'role',
         'first_name',
         'middle_name',
@@ -24,6 +25,19 @@ class Member extends Model
         'cluster_no',
         'is_leader',
     ];
+
+    public static function booted():void
+    {
+        static::creating(function ($model) {
+            if (is_null($model->code)) {
+                do{
+                    $generatedCode = fake()->bothify('????####');
+                } while (static::where('code', $generatedCode)->exists());
+
+                $model->code = $generatedCode;
+            }
+        });
+    }
 
     protected $casts = [
         'birth_date' => 'date',
