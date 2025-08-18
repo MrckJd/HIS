@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\QrCodeController;
 use App\Models\Member;
 use Illuminate\Support\Facades\Route;
@@ -11,18 +12,12 @@ Route::get('/test', function () {
     return view('welcome');
 });
 
-Route::get('/test-puppeteer-pdf', function () {
-    // return view('filament.MemberID', ['member' => Member::first(), 'qrCode' => QrCode::size(150)->generate('fsfy9067')]);
+Route::get('/members-ID',[MemberController::class,'generateMemberId'])->name('members.id');
 
-    try {
-        return Pdf::view('filament.MemberID', ['member' => Member::first(), 'qrCode' => QrCode::size(150)->generate('fsfy9067')])
-            ->format('a4')
-            ->withBrowsershot(fn (Browsershot $bs) => $bs->noSandbox()->setDelay(2000)
-                    ->timeout(60)
-                    ->showBackground()
-            )
-            ->name('test.pdf');
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()]);
-    }
+
+Route::get('/id-preview/{record}', function (Member $member) {
+    return view('filament.modal.idModal', [
+        'member' => $member,
+        'qrCode' => QrCode::size(150)->generate($member->code ? $member->code : ' No QR')
+    ]);
 });

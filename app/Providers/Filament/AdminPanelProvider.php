@@ -39,8 +39,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
                 MunicipalityChart::class, // Custom widget for municipality chart
                 ServicesPieChart::class, // Custom widget for services pie chart
             ])

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Member extends Model
 {
@@ -42,6 +44,13 @@ class Member extends Model
     protected $casts = [
         'birth_date' => 'date',
     ];
+
+    public function qrCode(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => QrCode::size(50)->generate($this->code ? $this->code : ' No QR')
+        );
+    }
 
     public function household(): BelongsTo
     {

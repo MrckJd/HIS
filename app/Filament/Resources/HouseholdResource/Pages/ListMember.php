@@ -151,18 +151,32 @@ class ListMember extends ManageRelatedRecords
             ])
             ->bulkActions([
                 BulkAction::make('mark_selected')
-                ->label('Generate ID')
-                ->icon('heroicon-o-identification')
-                ->action(function ($records){
-                    dd($records);
-                }),
+                    ->label('Generate ID')
+                    ->icon('heroicon-o-identification')
+                    ->action(function($records){
+                        $ids = $records->pluck('id')->toArray();
+                        return redirect()->route('members.id', ['members' => implode(', ', $ids)]);
+                    })
+                    ->openUrlInNewTab()
             ])
             ->actions([
                 Action::make('viewId')
                     ->icon('heroicon-o-eye')
                     ->modalWidth(MaxWidth::FitContent)
                     ->closeModalByClickingAway(false)
-                    ->modalContent(fn($record) => view('filament.modal.idModal', ['member' => $record], ['qrCode' => QrCode::size(150)->generate($record->code ? $record->code : ' No QR')])),
+                    ->modalContent(function ($record) {
+                        $url = url('id-preview', ['record' => $record->id]);
+
+                        $view = <<<HTML
+
+
+                            <iframe src="$url" class="w-full h-[500px] border-0"></iframe>
+
+                        HTML;
+
+                        return str($view)->toHtmlString();
+                        // view('filament.modal.idModal', ['member' => $record], ['qrCode' => QrCode::size(50)->generate($record->code ? $record->code : ' No QR')])
+                    }),
                 ActionGroup::make([
                     IsLeaderAction::make(),
                     EditAction::make('edit')
