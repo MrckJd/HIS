@@ -70,4 +70,9 @@ class Member extends Model
         return $this->hasMany(MemberServices::class);
     }
 
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'member_services');
+    }
+
 }
