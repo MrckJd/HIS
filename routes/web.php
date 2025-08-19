@@ -12,12 +12,20 @@ Route::get('/test', function () {
     return view('welcome');
 });
 
-Route::get('/members-ID',[MemberController::class,'generateMemberId'])->name('members.id');
+Route::get('/test-pdf', function($members = null) {
+    $members=Member::take(10)->get();
 
+    return view('filament.MemberID', [
+        'members' => $members,
+    ]);
+});
 
-Route::get('/id-preview/{record}', function (Member $member) {
-    return view('filament.modal.idModal', [
+Route::get('/id-preview/{record}', function ($member= null) {
+    $member = Member::findOrFail($member);
+    return view('filament.MemberID', [
         'member' => $member,
-        'qrCode' => QrCode::size(150)->generate($member->code ? $member->code : ' No QR')
+        'qrCode' => QrCode::size(150)->generate($member->code ? $member->code : ' No QR'),
+        'preview' => true,
+
     ]);
 });

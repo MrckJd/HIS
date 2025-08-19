@@ -4,6 +4,7 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Actions\BackAction;
 use App\Filament\Actions\Table\IsLeaderAction;
+use App\Filament\Actions\Table\ViewIdAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Service;
@@ -24,7 +25,9 @@ use Filament\Tables\Columns\IconColumn\IconColumnSize;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Spatie\Browsershot\Browsershot;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class ListMember extends ManageRelatedRecords
 {
@@ -154,29 +157,25 @@ class ListMember extends ManageRelatedRecords
                     ->label('Generate ID')
                     ->icon('heroicon-o-identification')
                     ->action(function($records){
-                        $ids = $records->pluck('id')->toArray();
-                        return redirect()->route('members.id', ['members' => implode(', ', $ids)]);
+                        $pdfContent = Pdf::view('filament.MemberID', ['members' => $records])
+                            ->format(Format::A4)
+                            ->withBrowsershot(fn (Browsershot $bs) => $bs
+                                ->portrait()
+                                ->noSandbox()
+                                ->setDelay(2000)
+                                ->timeout(60)
+                                ->showBackground()
+                            )
+                            ->base64();
+
+                        return response()->streamDownload(function() use ($pdfContent) {
+                            echo base64_decode($pdfContent);
+                        }, 'member_ids_' . $records->first()->household->title . '.pdf');
                     })
-                    ->openUrlInNewTab()
+
             ])
             ->actions([
-                Action::make('viewId')
-                    ->icon('heroicon-o-eye')
-                    ->modalWidth(MaxWidth::FitContent)
-                    ->closeModalByClickingAway(false)
-                    ->modalContent(function ($record) {
-                        $url = url('id-preview', ['record' => $record->id]);
-
-                        $view = <<<HTML
-
-
-                            <iframe src="$url" class="w-full h-[500px] border-0"></iframe>
-
-                        HTML;
-
-                        return str($view)->toHtmlString();
-                        // view('filament.modal.idModal', ['member' => $record], ['qrCode' => QrCode::size(50)->generate($record->code ? $record->code : ' No QR')])
-                    }),
+                ViewIdAction::make(),
                 ActionGroup::make([
                     IsLeaderAction::make(),
                     EditAction::make('edit')

@@ -48,7 +48,7 @@ class Member extends Model
     public function qrCode(): Attribute
     {
         return Attribute::make(
-            get: fn () => QrCode::size(50)->generate($this->code ? $this->code : ' No QR')
+            get: fn () => QrCode::size(45)->generate($this->code ? $this->code : ' No QR')
         );
     }
 
