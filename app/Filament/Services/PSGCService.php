@@ -10,7 +10,7 @@ class PSGCService
     public static function getMunicipalities(string $provinceCode = '112400000'): array
     {
         return Cache::remember("municipalities_{$provinceCode}", now()->addDay(), function() use ($provinceCode) {
-            $response = Http::get("https://psgc.gitlab.io/api/provinces/{$provinceCode}/municipalities/");
+            $response = Http::get("https://psgc.gitlab.io/api/provinces/{$provinceCode}/cities-municipalities/");
 
             if ($response->successful()) {
                 return collect($response->json())

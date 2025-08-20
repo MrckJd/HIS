@@ -22,7 +22,6 @@
                     <span class="text-md font-bold drop-shadow-md">{{$member->first_name}} {{substr($member->middle_name, 0, 1)}}. {{$member->surname}}</span><br>
                     <span class="text-[7px]"> {{ $member->household?->title ?? 'na'}}</span> <span class="text-[8px]"> ({{ $member->is_leader ? 'Household Leader' : $member->role }})</span>
                 </div>
-                <x-bi-person-bounding-box />
             </div>
 
             <div class="text-[12px] leading-2.5 text-amber-600 mt-2">

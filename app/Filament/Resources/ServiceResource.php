@@ -2,16 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\CreateServiceAction;
+use App\Filament\Actions\Table\EditServiceAction;
 use App\Filament\Resources\ServiceResource\Pages;
-use App\Filament\Resources\ServiceResource\RelationManagers;
 use App\Models\Service;
+use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ServiceResource extends Resource
 {
@@ -23,9 +26,15 @@ class ServiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                Repeater::make('services')
+                    ->label('Add Services')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                    ])
+                    ->columns(1)
+                    ->defaultItems(1),
             ]);
     }
 
@@ -34,11 +43,17 @@ class ServiceResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('member_services_count')
+                    ->label('Member Services Count')
+                    ->counts('memberServices')
+                    ->verticalAlignment(VerticalAlignment::Center),
             ])
             ->filters([
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditServiceAction::make('name')
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil'),
             ]);
     }
 
@@ -53,8 +68,6 @@ class ServiceResource extends Resource
     {
         return [
             'index' => Pages\ListServices::route('/'),
-            'create' => Pages\CreateService::route('/create'),
-            'edit' => Pages\EditService::route('/{record}/edit'),
         ];
     }
 }

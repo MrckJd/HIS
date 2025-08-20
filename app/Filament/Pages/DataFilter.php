@@ -28,6 +28,8 @@ class DataFilter extends Page implements HasTable
 
     protected static ?int $navigationSort = 10;
 
+    protected static ?string $navigationLabel = 'Reports';
+
     public function table(Table $table): Table
     {
         return $table

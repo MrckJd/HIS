@@ -5,6 +5,7 @@ namespace App\Filament\Forms;
 use App\Models\Service;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 
@@ -13,6 +14,18 @@ class AddMember
     public static function form(): array
     {
         return [
+            Group::make([
+                Forms\Components\FileUpload::make('avatar')
+                    ->avatar()
+                    ->directory('avatars')
+                    ->visibility('public')
+                    ->imageEditor()
+                    ->label('Profile Picture')
+                    ->maxSize(1024)
+                    ->acceptedFileTypes(['image/jpeg', 'image/png']),
+                ])
+                ->columnSpanFull()
+                ->extraAttributes(['class'=>'flex flex-col items-center justify-center w-full']),
             Forms\Components\TextInput::make('first_name')
                 ->required()
                 ->live()
@@ -56,26 +69,16 @@ class AddMember
     {
         return [
             TableRepeater::make('memberServices')
-                ->columnSpanFull()
-                ->defaultItems(1)
-                ->grid(3)
+                ->defaultItems(0)
                 ->schema([
                     Select::make('service_id')
                         ->label('Service')
-                        ->options(function($get) {
-                            $allSelectedServices = collect($get('../../members.member_services'))
-                                ->pluck('service_id')
-                                ->filter()
-                                ->toArray();
-                            $currentServiceId = $get('service_id');
-                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
-                            return Service::whereNotIn('id', $excludedServices)
-                                ->pluck('name', 'id')
-                                ->toArray();
-                        })
+                        ->options(Service::all()->pluck('name', 'id'))
                         ->live()
                         ->searchable(),
                     DatePicker::make('date_received')
+                        ->closeOnDateSelection()
+                        ->helperText('Date Format: dd/mm/YYYY')
                         ->label('Date Received'),
                 ]),
         ];

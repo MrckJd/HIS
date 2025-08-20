@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Member extends Model
@@ -15,6 +16,7 @@ class Member extends Model
 
     protected $fillable = [
         'household_id',
+        'avatar',
         'code',
         'role',
         'first_name',
@@ -37,6 +39,12 @@ class Member extends Model
                 } while (static::where('code', $generatedCode)->exists());
 
                 $model->code = $generatedCode;
+            }
+        });
+
+        static::deleting(function ($model) {
+            if ($model->avatar) {
+                Storage::disk('public')->delete($model->avatar);
             }
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ServiceResource\Pages;
 
+use App\Filament\Actions\CreateServiceAction;
 use App\Filament\Resources\ServiceResource;
 use App\Models\Service;
 use Filament\Actions;
@@ -18,23 +19,9 @@ class ListServices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('create')
-                ->modalAlignment(Alignment::Center)
-                ->modalWidth(MaxWidth::Medium)
-                ->modalSubmitActionLabel('Add')
-                ->closeModalByClickingAway(false)
-                ->modalDescription('Fill in the details of the new service.')
-                ->form([
-                    'name' => TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
-                ])
-                ->action(fn(Service $service, $data) => $service->create($data))
-                ->sendSuccessNotification()
-                ->successNotificationTitle('Service added successfully')
+            CreateServiceAction::make('create')
                 ->icon('heroicon-o-plus')
                 ->label('Add Service'),
-
         ];
     }
 }

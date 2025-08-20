@@ -8,6 +8,7 @@ use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -29,45 +30,62 @@ class HouseholdResource extends Resource
                 Tabs::make('Household Information')
                     ->contained(false)
                     ->columnSpanFull()
-                    ->columns(2)
                     ->tabs([
                         Tab::make('Basic Information')
                             ->schema([
-                                Forms\Components\TextInput::make('title')
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\Select::make('municipality')
-                                    ->required()
-                                    ->native(false)
-                                    ->loadingMessage('Loading municipalities...')
-                                    ->noSearchResultsMessage('No Municipalities found.')
-                                    ->searchable('name')
-                                    ->reactive()
-                                    ->searchPrompt('Search municipalities...')
-                                    ->options(fn() => PSGCService::getMunicipalities()),
-                                Forms\Components\Select::make('baranggay')
-                                    ->live()
-                                    ->loadingMessage('Loading branggays...')
-                                    ->noSearchResultsMessage('No Baranggays found.')
-                                    ->searchable('name')
-                                    ->native(false)
-                                    ->required()
-                                    ->options(function($get){
-                                        $municipality = $get('municipality');
-                                        if (!$municipality) {
-                                            return [];
-                                        }
-                                        return PSGCService::getBarangays($municipality);
-                                    }),
-                                Forms\Components\TextInput::make('purok')
-                                    ->required()
-                                    ->maxLength(255),
+                                Section::make('Address')
+                                    ->columns(['lg'=>3])
+                                    ->description('Please input Household Address')
+                                    ->schema([
+                                        Forms\Components\Select::make('municipality')
+                                            ->required()
+                                            ->native(false)
+                                            ->loadingMessage('Loading municipalities...')
+                                            ->noSearchResultsMessage('No Municipalities found.')
+                                            ->searchable('name')
+                                            ->reactive()
+                                            ->searchPrompt('Search municipalities...')
+                                            ->options(fn() => PSGCService::getMunicipalities()),
+                                        Forms\Components\Select::make('baranggay')
+                                            ->live()
+                                            ->loadingMessage('Loading branggays...')
+                                            ->noSearchResultsMessage('No Baranggays found.')
+                                            ->searchable('name')
+                                            ->native(false)
+                                            ->required()
+                                            ->options(function($get){
+                                                $municipality = $get('municipality');
+                                                if (!$municipality) {
+                                                    return [];
+                                                }
+                                                return PSGCService::getBarangays($municipality);
+                                            }),
+                                        Forms\Components\TextInput::make('purok')
+                                            ->required()
+                                            ->maxLength(255),
+                                    ]),
+                                Section::make('Leader Information')
+                                        ->description('Please input Household Leader Personal Information')
+                                        ->schema([
+                                            Repeater::make('leader')
+                                                ->relationship('members')
+                                                ->columns(['lg'=>3])
+                                                ->addable(false)
+                                                ->reorderable(false)
+                                                ->deletable(false)
+                                                ->label('')
+                                                ->schema([
+                                                    ...AddMember::form(),
+                                                    ...AddMember::memberServicesForm(),
+                                                ]),
+                                        ])
                             ]),
 
                         Tab::make('Member')
                             ->schema([
                                 Repeater::make('members')
                                     ->columnspanFull()
+                                    ->defaultItems(0)
                                     ->collapsible()
                                     ->itemLabel(fn($state) => $state['first_name'] . ' ' . $state['surname'])
                                     ->columns(3)
@@ -84,8 +102,6 @@ class HouseholdResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
-                    ->searchable(),
                 TextColumn::make('leader_name')
                     ->label('Leader'),
                 TextColumn::make('address')

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('households', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('title')->unique();
             $table->string('municipality');
             $table->string('baranggay');
             $table->string('purok');

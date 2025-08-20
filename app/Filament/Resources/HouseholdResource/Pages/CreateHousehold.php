@@ -6,8 +6,10 @@ use App\Filament\Resources\HouseholdResource;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use App\Models\MemberServices;
+use Exception;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class CreateHousehold extends CreateRecord
 {
@@ -18,28 +20,53 @@ class CreateHousehold extends CreateRecord
     public function handleRecordCreation($data): Model
     {
 
+            DB::beginTransaction();
 
-        $household = Household::create($data);
+        try {
+            $household = Household::create($data);
 
-        if (isset($data['members'])) {
-            foreach ($data['members'] as $memberData) {
-                $memberData['household_id'] = $household->id;
-                $member = $household->members()->create($memberData);
 
-                if (isset($memberData['memberServices'])) {
-                    foreach ($memberData['memberServices'] as $service) {
+            if(isset($data['leader'])){
+                $data['leader'][0]['household_id'] = $household->id;
+                $data['leader'][0]['is_leader'] = true;
+                $leaderData = $data['leader'][0];
+                $leader=$household->members()->create($leaderData);
+
+                if(isset($data['leader']['memberServices'])){
+                    foreach ($data['leader']['memberServices'] as $service) {
                         MemberServices::create([
-                            'member_id' => $member->id,
+                            'member_id' => $leader->id,
                             'service_id' => $service['service_id'],
                             'date_received' => $service['date_received'],
                         ]);
                     }
                 }
             }
+
+            if (isset($data['members'])) {
+                foreach ($data['members'] as $memberData) {
+                    $memberData['household_id'] = $household->id;
+                    $member = $household->members()->create($memberData);
+
+                    if (isset($memberData['memberServices'])) {
+                        foreach ($memberData['memberServices'] as $service) {
+                            MemberServices::create([
+                                'member_id' => $member->id,
+                                'service_id' => $service['service_id'],
+                                'date_received' => $service['date_received'],
+                            ]);
+                        }
+                    }
+                }
+            }
+            DB::commit();
+            return $household;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
 
 
-        return $household;
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

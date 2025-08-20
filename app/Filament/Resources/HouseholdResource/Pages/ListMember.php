@@ -8,7 +8,6 @@ use App\Filament\Actions\Table\ViewIdAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Service;
-use Filament\Support\Colors\Color;
 use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -20,8 +19,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\IconColumn\IconColumnSize;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
@@ -113,16 +111,14 @@ class ListMember extends ManageRelatedRecords
     {
         return $table
             ->columns([
-                IconColumn::make('is_leader')
-                    ->label('')
-                    ->size(IconColumnSize::Medium)
-                    ->trueIcon('fas-crown')
-                    ->state(function($record) {
-                        return $record->is_leader ? 'fas-crown' : '';
-                    })
-                    ->color(Color::Amber),
+                ImageColumn::make('avatar')
+                    ->label('Avatar')
+                    ->circular()
+                    ->default('https://ui-avatars.com/api/?name=No+Avatar&background=random&color=fff'),
                 TextColumn::make('full_name')
                     ->label('Name')
+                    ->formatStateUsing(fn($state, $record) => $state . ' (' . ($record->role ? $record->role : 'No Role') . ')')
+                    ->description(fn($record) => $record->is_leader ? 'Household Leader' : '')
                     ->searchable(['surname', 'first_name', 'middle_name', 'suffix'])
                     ->sortable(fn($query) => $query)
                     ->sortable(query: function ($query, $direction) {

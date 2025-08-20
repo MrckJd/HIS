@@ -12,7 +12,6 @@ class Household extends Model
     use HasUlids;
 
     protected $fillable = [
-        'title',
         'municipality',
         'baranggay',
         'purok',
