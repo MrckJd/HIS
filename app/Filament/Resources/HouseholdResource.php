@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\UserRole;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -25,6 +27,11 @@ class HouseholdResource extends Resource
     protected static ?string $model = Household::class;
 
     protected static ?string $navigationIcon = 'fluentui-people-community-16';
+
+    public static function canAccess(): bool
+    {
+        return auth()->check() && (auth()->user()->role === UserRole::ROOT->getLabel() || auth()->user()->role === UserRole::ADMIN->getLabel()) || auth()->user()->role === UserRole::ENCODER->getLabel();
+    }
 
     public static function form(Form $form): Form
     {

@@ -13,11 +13,10 @@ Route::get('/test', function () {
 });
 
 Route::get('/test-pdf', function($member = null) {
-    $member=Member::take(1)->get();
+    $members=Member::take(10)->get();
     return view('filament.MemberID', [
-        'leader' => dd($member->household->LeaderName),
-        'member' => $member,
-        'preview'=>true,
+        'leader' => 'test-leader this is',
+        'members' => $members,
     ]);
 });
 

@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\UserRole;
 use App\Filament\Actions\CreateServiceAction;
 use App\Filament\Actions\Table\EditServiceAction;
 use App\Filament\Resources\ServiceResource\Pages;
 use App\Models\Service;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Form;
@@ -21,6 +23,11 @@ class ServiceResource extends Resource
     protected static ?string $model = Service::class;
 
     protected static ?string $navigationIcon = 'fas-file-alt';
+
+    public static function canAccess(): bool
+    {
+        return auth()->check() && auth()->user()->role == UserRole::PROVIDER->getLabel() || UserRole::ROOT->getLabel() || UserRole::ADMIN->getLabel();
+    }
 
     public static function form(Form $form): Form
     {

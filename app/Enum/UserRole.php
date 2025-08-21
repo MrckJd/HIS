@@ -4,18 +4,31 @@ namespace App\Enum;
 
 enum UserRole: string
 {
-    case root = 'Root';
+    case ROOT = 'root';
 
-    case admin = 'Admin';
+    case ADMIN = 'admin';
 
-    case encoder = 'Encoder';
+    case ENCODER = 'encoder';
 
-    case provider = 'Service Provider';
+    case PROVIDER = 'service provider';
 
     public function getLabel(): ?string
     {
         return match ($this) {
             default => mb_ucfirst($this->value),
         };
+    }
+
+    public static function options(bool $root = false): array
+    {
+        $filtered = array_filter(
+            self::cases(),
+            fn (self $role) => $root || ! in_array($role, [self::ROOT])
+        );
+
+        return array_combine(
+            array_map(fn (self $role) => $role->value, $filtered),
+            array_map(fn (self $role) => $role->getLabel(), $filtered)
+        );
     }
 }

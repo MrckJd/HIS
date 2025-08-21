@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enum\UserRole;
 use App\Filament\Forms\AddMember;
 use App\Filament\Services\PSGCService;
 use App\Models\Member;
@@ -38,6 +39,11 @@ class AddMemberServices extends Page implements HasTable
     protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Add member services';
+
+    public static function canAccess():bool
+    {
+        return auth()->check() && auth()->user()->role === UserRole::ADMIN->getLabel() || auth()->user()->role === UserRole::ROOT->getLabel() || auth()->user()->role === UserRole::PROVIDER->getLabel();
+    }
 
     public function table(Table $table): Table
     {
