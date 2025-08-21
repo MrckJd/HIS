@@ -139,16 +139,16 @@ class AddMemberServices extends Page implements HasTable
                                         ];
                                     })->toArray();
                                 })
-                                ->rules([
-                                    'unique_dates' => function () {
-                                        return function ($attribute, $value, $fail) {
-                                            $dates = collect($value)->pluck('date_received')->filter()->toArray();
-                                            if (count(array_unique($dates)) !== count($dates)) {
-                                                $fail('Duplicate dates are not allowed. Each service must have a unique date received.');
-                                            }
-                                        };
-                                    },
-                                ])
+                                // ->rules([
+                                //     'unique_dates' => function () {
+                                //         return function ($attribute, $value, $fail) {
+                                //             $dates = collect($value)->pluck('date_received')->filter()->toArray();
+                                //             if (count(array_unique($dates)) !== count($dates)) {
+                                //                 $fail('Duplicate dates are not allowed. Each service must have a unique date received.');
+                                //             }
+                                //         };
+                                //     },
+                                // ])
                     ])
                     ->modalSubmitActionLabel('Save')
                     ->closeModalByClickingAway(false),
