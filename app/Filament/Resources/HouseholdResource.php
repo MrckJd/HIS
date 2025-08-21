@@ -11,9 +11,12 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -68,7 +71,8 @@ class HouseholdResource extends Resource
                                         ->description('Please input Household Leader Personal Information')
                                         ->schema([
                                             Repeater::make('leader')
-                                                ->relationship('members')
+                                                ->relationship('leader')
+                                                ->defaultItems(1)
                                                 ->columns(['lg'=>3])
                                                 ->addable(false)
                                                 ->reorderable(false)
@@ -76,6 +80,10 @@ class HouseholdResource extends Resource
                                                 ->label('')
                                                 ->schema([
                                                     ...AddMember::form(),
+                                                    TextInput::make('is_leader')
+                                                        ->default(true)
+                                                        ->hidden()
+                                                        ->dehydratedWhenHidden(),
                                                     ...AddMember::memberServicesForm(),
                                                 ]),
                                         ])
@@ -84,6 +92,7 @@ class HouseholdResource extends Resource
                         Tab::make('Member')
                             ->schema([
                                 Repeater::make('members')
+                                    ->relationship('members')
                                     ->columnspanFull()
                                     ->defaultItems(0)
                                     ->collapsible()
@@ -116,6 +125,9 @@ class HouseholdResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    DeleteAction::make()
+                ])
             ])
             ->recordAction(null)
             ->recordUrl(fn ($record) => static::getUrl('list_member', ['record' => $record]));

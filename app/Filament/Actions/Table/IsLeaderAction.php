@@ -34,7 +34,7 @@ class IsLeaderAction extends Action
                 try{
                     $this->beginDatabaseTransaction();
 
-                    $record->household->members()
+                    $record->household->listmembers()
                         ->where('id', '!=', $record->id)
                         ->update(['is_leader' => false]);
                     $record->update(['is_leader' => true]);

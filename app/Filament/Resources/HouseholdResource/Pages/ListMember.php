@@ -8,6 +8,7 @@ use App\Filament\Actions\Table\ViewIdAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Service;
+use BladeUI\Icons\Components\Icon;
 use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -31,7 +32,7 @@ class ListMember extends ManageRelatedRecords
 {
     protected static string $resource = HouseholdResource::class;
 
-    protected static string $relationship = 'members';
+    protected static string $relationship = 'listmembers';
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
@@ -111,10 +112,10 @@ class ListMember extends ManageRelatedRecords
     {
         return $table
             ->columns([
-                ImageColumn::make('avatar')
+                ImageColumn::make('avatarUrl')
                     ->label('Avatar')
-                    ->circular()
-                    ->default('https://ui-avatars.com/api/?name=No+Avatar&background=random&color=fff'),
+                    ->disk('public')
+                    ->circular(),
                 TextColumn::make('full_name')
                     ->label('Name')
                     ->formatStateUsing(fn($state, $record) => $state . ' (' . ($record->role ? $record->role : 'No Role') . ')')

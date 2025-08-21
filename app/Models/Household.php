@@ -21,6 +21,15 @@ class Household extends Model
     public function members(): HasMany
     {
         return $this->hasMany(Member::class)
+            ->where(function($query){
+                $query->whereNull('is_leader')
+                      ->orWhere('is_leader', false);
+            });
+    }
+
+    public function listmembers(): HasMany
+    {
+        return $this->hasMany(Member::class)
             ->orderBy('is_leader', 'desc');
     }
 
