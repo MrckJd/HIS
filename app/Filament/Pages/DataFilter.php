@@ -10,9 +10,15 @@ use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\Action;
+use App\Models\Service;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section;
+use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -34,16 +40,20 @@ class DataFilter extends Page implements HasTable
     {
         return $table
             ->columns([
+                ImageColumn::make('avatarUrl')
+                    ->label('Avatar')
+                    ->circular(),
                 TextColumn::make('full_name')
                     ->label('Full Name')
                     ->getStateUsing(fn ($record) => trim(
                         $record->surname . ', ' . $record->first_name . ' ' . $record->middle_name
                     ))
-                    ->description(fn ($record) => $record->household->title),
+                    ->searchable(['first_name', 'surname']),
                 TextColumn::make('gender')
                     ->badge(),
                 TextColumn::make('household.address')
-                    ->label('Complete Address'),
+                    ->label('Complete Address')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('Precinct No/Cluster No')
                     ->label('Precinct/Cluster')
                     ->getStateUsing(fn ($record) => trim(
@@ -58,18 +68,38 @@ class DataFilter extends Page implements HasTable
                 ViewAction::make()
                     ->modalHeading('Services Availed')
                     ->infolist([
-
-                        RepeatableEntry::make('memberServices')
-                            ->hiddenLabel()
-                            ->contained(false)
-                            ->columns(2)
+                        Section::make()
                             ->schema([
-                                TextEntry::make('service.name')
-                                    ->hiddenLabel(),
-                                TextEntry::make('date_received')
-                                    ->date('Y-m-d')
-                                    ->hiddenLabel(),
+                                ImageEntry::make('avatarUrl')
+                                    ->label('')
+                                    ->circular()
+                                    ->size(60)
+                                    ->defaultImageUrl(url('/images/default-avatar.png'))
+                                    ->extraAttributes(['class' => 'mx-auto w-8 h-8']), // Center and size avatar
+                                TextEntry::make('member.name')
+                                    ->label('')
+                                    ->getStateUsing(fn ($record) => trim(
+                                        $record->surname . ', ' . $record->first_name . ' ' . $record->middle_name
+                                    ))
+                                    ->alignCenter()
+                                    ->weight('bold')
+                                    ->size('lg')
+                                    ->extraAttributes(['class' => 'text-center mt-2']), // Center and style name
                             ])
+                            ->columns(1)
+                            ->extraAttributes(['class' => 'text-center']), // Center section content
+                       Section::make('Services Availed')
+                            ->schema([
+                                RepeatableEntry::make('memberServices')
+                                    ->hiddenLabel()
+                                    ->contained(false)
+                                    ->columns(2)
+                                    ->schema([
+                                        TextEntry::make('service.name')->hiddenLabel(),
+                                        TextEntry::make('date_received')->date('Y-m-d')->hiddenLabel(),
+                            ])
+                        ])
+                        ->collapsible(),
                     ]),
             ])
             ->filters([
@@ -86,12 +116,6 @@ class DataFilter extends Page implements HasTable
                             });
                         }
                     }),
-                SelectFilter::make('gender')
-                    ->label('Gender')
-                    ->options([
-                        'Male' => 'Male',
-                        'Female' => 'Female',
-                    ]),
                 \Filament\Tables\Filters\Filter::make('age_range')
                     ->label('Age Range')
                     ->form([
@@ -158,6 +182,16 @@ class DataFilter extends Page implements HasTable
                     }),
             ])
             ->query(Member::query())
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('household'))
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('household_id')
+                    ->label('Household')
+                    ->getTitleFromRecordUsing(fn (Member $record) => $record->household?->address ?? 'No Household')
+                    ->collapsible(),
+                \Filament\Tables\Grouping\Group::make('gender')
+                    ->label('Gender')
+                    ->collapsible(),
+            ])
             ->recordAction('view');
     }
 
