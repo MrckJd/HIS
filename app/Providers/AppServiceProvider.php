@@ -19,9 +19,11 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     */
+    */
     public function boot(): void
     {
         FilamentView::registerRenderHook(PanelsRenderHook::HEAD_START, fn() => Blade::render ('@vite(\'resources/css/app.css\')'));
+
+        $this->app->bind(\Filament\Http\Responses\Auth\Contracts\LogoutResponse::class, \App\Http\Response\LogOutResponse::class);
     }
 }

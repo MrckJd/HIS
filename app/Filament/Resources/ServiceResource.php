@@ -26,7 +26,7 @@ class ServiceResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role == UserRole::PROVIDER->getLabel() || UserRole::ROOT->getLabel() || UserRole::ADMIN->getLabel();
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'provider']);
     }
 
     public static function form(Form $form): Form

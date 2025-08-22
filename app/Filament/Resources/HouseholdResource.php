@@ -7,6 +7,7 @@ use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
+use App\Models\Member;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
@@ -18,9 +19,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\Browsershot\Browsershot;
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\LaravelPdf\Facades\Pdf;
 
 class HouseholdResource extends Resource
 {
@@ -30,7 +36,7 @@ class HouseholdResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->check() && (auth()->user()->role === UserRole::ROOT->getLabel() || auth()->user()->role === UserRole::ADMIN->getLabel()) || auth()->user()->role === UserRole::ENCODER->getLabel();
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'encoder']);
     }
 
     public static function form(Form $form): Form
@@ -119,7 +125,15 @@ class HouseholdResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('leader_name')
-                    ->label('Leader'),
+                    ->label('Leader')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('leader', function ($q) use ($search) {
+                            $q->where('first_name', 'like', "%{$search}%")
+                              ->orWhere('middle_name', 'like', "%{$search}%")
+                              ->orWhere('surname', 'like', "%{$search}%")
+                              ->orWhere('suffix', 'like', "%{$search}%");
+                        });
+                    }),
                 TextColumn::make('address')
                     ->label('Complete Address'),
                 TextColumn::make('members_count')
@@ -130,10 +144,34 @@ class HouseholdResource extends Resource
             ->filters([
                 //
             ])
+            ->bulkActions([
+                BulkAction::make('mark_selected')
+                    ->label('Generate ID')
+                    ->icon('heroicon-o-identification')
+                    ->action(function($records){
+                        $members = Member::whereIn('household_id', $records->pluck('id')->toArray())->get();
+                        $pdfContent = Pdf::view('filament.MemberID', ['members' => $members])
+                            ->format(Format::A4)
+                            ->withBrowsershot(fn (Browsershot $bs) => $bs
+                                ->portrait()
+                                ->noSandbox()
+                                ->setDelay(2000)
+                                ->timeout(60)
+                                ->showBackground()
+                            )
+                            ->base64();
+
+                        return response()->streamDownload(function() use ($pdfContent) {
+                            echo base64_decode($pdfContent);
+                        }, 'member_ids_.pdf');
+                    })
+            ]
+            )
             ->actions([
                 Tables\Actions\EditAction::make(),
                 ActionGroup::make([
                     DeleteAction::make()
+                        ->visible(fn ($record) => auth()->check() && (auth()->user()->role === UserRole::ADMIN->getLabel() || auth()->user()->role === UserRole::ROOT->getLabel()))
                 ])
             ])
             ->recordAction(null)

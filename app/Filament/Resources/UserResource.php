@@ -23,9 +23,9 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 11;
 
-    public static function canAccess():bool
+    public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === UserRole::ROOT->getLabel() || auth()->user()->role === UserRole::ADMIN->getLabel();
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin']);
     }
 
     public static function form(Form $form): Form

@@ -8,6 +8,7 @@ use App\Filament\Services\PSGCService;
 use App\Models\Member;
 use App\Models\Service;
 use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -40,9 +41,9 @@ class AddMemberServices extends Page implements HasTable
 
     protected static ?string $navigationLabel = 'Add member services';
 
-    public static function canAccess():bool
+    public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->role === UserRole::ADMIN->getLabel() || auth()->user()->role === UserRole::ROOT->getLabel() || auth()->user()->role === UserRole::PROVIDER->getLabel();
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'serviceProvider']);
     }
 
     public function table(Table $table): Table

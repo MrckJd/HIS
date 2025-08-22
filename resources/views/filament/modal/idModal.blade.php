@@ -51,7 +51,7 @@
             </div>
             <div class="absolute bottom-4 right-2 bg-white p-[3px] pb-[1px] rounded-sm shadow-lg">
                 {{$member->qrCode}}
-                <p class="text-[5px] text-stone-500 text-center text-shadow-md">ID Code: {{$member->code}}</p>
+                <p class="text-[5px] font-bold text-stone-500 text-center text-shadow-md">{{$member->code}}</p>
             </div>
         </div>
         <div class="absolute pt-0 flex space-x-1 text-[6px] bottom-[1px]">

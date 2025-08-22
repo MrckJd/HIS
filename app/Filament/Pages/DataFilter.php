@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enum\UserRole;
 use App\Models\Household;
 use App\Filament\Services\PSGCService;
 use App\Models\Member;
@@ -12,6 +13,7 @@ use Filament\Pages\Page;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\Action;
 use App\Models\Service;
+use Filament\Facades\Filament;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +37,12 @@ class DataFilter extends Page implements HasTable
     protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Reports';
+
+
+    public static function canAccess(): bool
+    {
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin']);
+    }
 
     public function table(Table $table): Table
     {

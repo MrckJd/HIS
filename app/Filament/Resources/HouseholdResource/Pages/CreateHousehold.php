@@ -7,6 +7,7 @@ use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use App\Models\MemberServices;
 use Exception;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,11 @@ class CreateHousehold extends CreateRecord
     protected static string $resource = HouseholdResource::class;
 
     protected static bool $canCreateAnother = false;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 
     public function handleRecordCreation($data): Model
     {
@@ -42,6 +48,10 @@ class CreateHousehold extends CreateRecord
                 }
             }
             DB::commit();
+            Notification::make()
+                ->title('Household created successfully.')
+                ->success()
+                ->send();
             return $household;
         } catch (Exception $e) {
             DB::rollBack();

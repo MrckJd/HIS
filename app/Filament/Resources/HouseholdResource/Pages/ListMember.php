@@ -169,7 +169,6 @@ class ListMember extends ManageRelatedRecords
                             echo base64_decode($pdfContent);
                         }, 'member_ids_' . $records->first()->household->title . '.pdf');
                     })
-
             ])
             ->actions([
                 ViewIdAction::make(),
