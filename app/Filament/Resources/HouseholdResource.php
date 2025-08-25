@@ -77,6 +77,7 @@ class HouseholdResource extends Resource
                                                 return PSGCService::getBarangays($municipality);
                                             }),
                                         Forms\Components\TextInput::make('purok')
+                                            ->label('Purok / Sitio')
                                             ->required()
                                             ->maxLength(255),
                                     ]),
@@ -92,12 +93,11 @@ class HouseholdResource extends Resource
                                                 ->deletable(false)
                                                 ->label('')
                                                 ->schema([
-                                                    ...AddMember::form(),
                                                     TextInput::make('is_leader')
-                                                        ->default(true)
-                                                        ->hidden()
-                                                        ->dehydratedWhenHidden(),
-                                                    ...AddMember::memberServicesForm(),
+                                                    ->default(true)
+                                                    ->hidden()
+                                                    ->dehydratedWhenHidden(),
+                                                    ...AddMember::form(),
                                                 ]),
                                         ])
                             ]),
@@ -113,7 +113,6 @@ class HouseholdResource extends Resource
                                     ->columns(3)
                                     ->schema([
                                         ...AddMember::form(),
-                                        ...AddMember::memberServicesForm(),
                                     ]),
                             ]),
                     ])
@@ -146,6 +145,7 @@ class HouseholdResource extends Resource
             ])
             ->bulkActions([
                 BulkAction::make('mark_selected')
+                    ->hidden(fn()=>Filament::getCurrentPanel()->getId() == 'encoder')
                     ->label('Generate ID')
                     ->icon('heroicon-o-identification')
                     ->action(function($records){
@@ -171,7 +171,7 @@ class HouseholdResource extends Resource
                 Tables\Actions\EditAction::make(),
                 ActionGroup::make([
                     DeleteAction::make()
-                        ->visible(fn ($record) => auth()->check() && (auth()->user()->role === UserRole::ADMIN->getLabel() || auth()->user()->role === UserRole::ROOT->getLabel()))
+                        ->hidden(fn()=>Filament::getCurrentPanel()->getId() == 'encoder')
                 ])
             ])
             ->recordAction(null)

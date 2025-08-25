@@ -48,10 +48,6 @@ class CreateHousehold extends CreateRecord
                 }
             }
             DB::commit();
-            Notification::make()
-                ->title('Household created successfully.')
-                ->success()
-                ->send();
             return $household;
         } catch (Exception $e) {
             DB::rollBack();

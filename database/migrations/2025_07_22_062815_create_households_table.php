@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('municipality');
             $table->string('baranggay');
             $table->string('purok');
+            $table->foreignUlId('user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->string('address')->nullable();
             $table->timestamps();
         });

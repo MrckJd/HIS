@@ -47,14 +47,24 @@ class AddMember
                 ])
                 ->required(),
             Forms\Components\Select::make('role')
-                ->options([
-                    'Head' => 'Head of Household',
-                    'Spouse' => 'Spouse',
-                    'Child' => 'Child',
-                    'Parent' => 'Parent',
-                    'Sibling' => 'Sibling',
-                    'Other' => 'Other Relative',
-                ])
+                ->label('Relationship')
+                ->default(fn($get)=> $get('is_leader') ? 'Head' : '')
+                ->hidden(function($get) {
+                    return $get('is_leader');
+                })
+                ->dehydratedWhenHidden()
+                ->options(
+                    function($get){
+                        return $get('is_leader') ? [
+                            'Head' => 'Head of Household',
+                        ] : [
+                            'Spouse' => 'Spouse',
+                            'Child' => 'Child',
+                            'Parent' => 'Parent',
+                            'Sibling' => 'Sibling',
+                            'Other' => 'Other Relative',
+                        ];
+                    })
                 ->required(),
             Forms\Components\TextInput::make('precinct_no')
                 ->numeric()
