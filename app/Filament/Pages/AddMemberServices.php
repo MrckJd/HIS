@@ -58,7 +58,6 @@ class AddMemberServices extends Page implements HasTable
                     ->getStateUsing(fn ($record) => trim(
                         $record->surname . ', ' . $record->first_name . ' ' . $record->middle_name
                     ))
-                    ->description(fn ($record) => $record->code)
                     ->searchable(['first_name', 'surname', 'code']),
                 TextColumn::make('gender')
                     ->badge(),
@@ -84,9 +83,9 @@ class AddMemberServices extends Page implements HasTable
                                 ImageEntry::make('avatarUrl')
                                     ->label('')
                                     ->circular()
-                                    ->size(60)
+                                    ->size(120)
                                     ->defaultImageUrl(url('/images/default-avatar.png'))
-                                    ->extraAttributes(['class' => 'mx-auto w-8 h-8']), // Center and size avatar
+                                    ->extraAttributes(['class' => 'mx-auto w-28 h-28']), // Center and size avatar
                                 TextEntry::make('member.name')
                                     ->label('')
                                     ->getStateUsing(fn ($record) => trim(
