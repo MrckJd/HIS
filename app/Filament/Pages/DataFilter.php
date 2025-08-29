@@ -81,9 +81,9 @@ class DataFilter extends Page implements HasTable
                                 ImageEntry::make('avatarUrl')
                                     ->label('')
                                     ->circular()
-                                    ->size(60)
+                                    ->size(120)
                                     ->defaultImageUrl(url('/images/default-avatar.png'))
-                                    ->extraAttributes(['class' => 'mx-auto w-8 h-8']), // Center and size avatar
+                                    ->extraAttributes(['class' => 'mx-auto w-28 h-28']),
                                 TextEntry::make('member.name')
                                     ->label('')
                                     ->getStateUsing(fn ($record) => trim(
@@ -123,6 +123,45 @@ class DataFilter extends Page implements HasTable
                                 $q->whereIn('services.id', $data['values']);
                             });
                         }
+                    }),
+                SelectFilter::make('precinct_no')
+                    ->label('Precinct No')
+                    ->options(fn () => Member::query()
+                        ->whereNotNull('precinct_no')
+                        ->where('precinct_no', '!=', '')
+                        ->distinct()
+                        ->orderBy('precinct_no')
+                        ->pluck('precinct_no', 'precinct_no'))
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['values'])) {
+                            $query->whereIn('precinct_no', $data['values']);
+                        }
+                    })
+                    ->indicateUsing(fn (array $data) => !empty($data['values']) ? collect($data['values'])->map(fn($v) => 'Precinct: '.$v)->all() : []),
+                SelectFilter::make('avatar_status')
+                    ->label('Avatar')
+                    ->options([
+                        'no' => 'No Avatar',
+                        'yes' => 'Has Avatar',
+                    ])
+                    ->placeholder('Any')
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+                        if ($value === 'no') {
+                            $query->where(fn ($q) => $q->whereNull('avatar')->orWhere('avatar', ''));
+                        } elseif ($value === 'yes') {
+                            $query->whereNotNull('avatar')->where('avatar', '!=', '');
+                        }
+                    })
+                    ->indicateUsing(function (array $data) {
+                        return match ($data['value'] ?? null) {
+                            'no' => ['No Avatar'],
+                            'yes' => ['Has Avatar'],
+                            default => [],
+                        };
                     }),
                 \Filament\Tables\Filters\Filter::make('age_range')
                     ->label('Age Range')
