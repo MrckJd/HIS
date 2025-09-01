@@ -135,6 +135,8 @@ class HouseholdResource extends Resource
                     }),
                 TextColumn::make('address')
                     ->label('Complete Address'),
+            TextColumn::make('user.name')
+                    ->label('Encoder'),
                 TextColumn::make('members_count')
                     ->label('Members')
                     ->counts('members')

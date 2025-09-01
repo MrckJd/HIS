@@ -5,6 +5,7 @@ namespace App\Filament\Forms;
 use App\Models\Service;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
@@ -15,13 +16,15 @@ class AddMember
     {
         return [
             Group::make([
-                Forms\Components\FileUpload::make('avatar')
+                FileUpload::make('avatar')
                     ->avatar()
                     ->directory('avatars')
                     ->visibility('public')
                     ->imageEditor()
                     ->label('Profile Picture')
-                    ->maxSize(1024)
+                    ->imageCropAspectRatio('1:1')
+                    ->imageResizeTargetHeight('500')
+                    ->imageResizeTargetWidth('500')
                     ->acceptedFileTypes(['image/jpeg', 'image/png']),
                 ])
                 ->columnSpanFull()

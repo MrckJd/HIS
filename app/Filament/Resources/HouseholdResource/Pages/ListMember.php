@@ -92,20 +92,7 @@ class ListMember extends ManageRelatedRecords
 
     public function getTitle(): string
     {
-
-        $title = $this->getRecord()->title;
-        $leader = $this->getRecord()
-                        ->members()
-                        ->where('is_leader', true)
-                        ->get();
-
-        if ($leader->isEmpty()) {
-            return $title . ' (No Leader)';
-        }
-
-        $leaderName = $leader->first()->first_name . ' ' . ($leader->first()->middle_name ? substr($leader->first()->middle_name, 0, 1) . '. ' : '') . $leader->first()->surname . ' ' . ($leader->first()->suffix ? $leader->first()->suffix : '');
-
-        return $title . ' (' . $leaderName . ')';
+        return $this->getRecord()->leader_name ?: 'No Leader';
     }
 
     public function table(Table $table): Table

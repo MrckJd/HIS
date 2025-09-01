@@ -67,6 +67,8 @@ class DataFilter extends Page implements HasTable
                     ->getStateUsing(fn ($record) => trim(
                         $record->precinct_no . ' - ' . $record->cluster_no
                     )),
+                TextColumn::make('household.user.name')
+                    ->label('Encoder'),
                 TextColumn::make('services_count')
                     ->label('Services Availed')
                     ->counts('services')
