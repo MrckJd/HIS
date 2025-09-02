@@ -8,6 +8,8 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+@variant dark (.dark &);
+
 @theme {
     --font-roboto: Roboto, sans-serif;
 

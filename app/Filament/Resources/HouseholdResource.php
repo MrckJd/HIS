@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Enum\UserRole;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
 use App\Filament\Services\PSGCService;
+use App\Jobs\GeneratePDF;
 use App\Models\Household;
 use App\Models\Member;
 use Filament\Facades\Filament;
@@ -16,11 +16,14 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\View;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -123,24 +126,28 @@ class HouseholdResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('leader_name')
-                    ->label('Leader')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('leader', function ($q) use ($search) {
-                            $q->where('first_name', 'like', "%{$search}%")
-                              ->orWhere('middle_name', 'like', "%{$search}%")
-                              ->orWhere('surname', 'like', "%{$search}%")
-                              ->orWhere('suffix', 'like', "%{$search}%");
-                        });
-                    }),
-                TextColumn::make('address')
-                    ->label('Complete Address'),
-            TextColumn::make('user.name')
-                    ->label('Encoder'),
-                TextColumn::make('members_count')
-                    ->label('Members')
-                    ->counts('members')
-                    ->badge(),
+                Split::make([
+                    TextColumn::make('leader_name')
+                        ->label('Leader')
+                        ->searchable(query: function (Builder $query, string $search): Builder {
+                            return $query->whereHas('leader', function ($q) use ($search) {
+                                $q->where('first_name', 'like', "%{$search}%")
+                                  ->orWhere('middle_name', 'like', "%{$search}%")
+                                  ->orWhere('surname', 'like', "%{$search}%")
+                                  ->orWhere('suffix', 'like', "%{$search}%");
+                            });
+                        }),
+                    TextColumn::make('address')
+                        ->label('Complete Address'),
+                    TextColumn::make('user.name')
+                        ->label('Encoder'),
+                    TextColumn::make('members_count')
+                        ->label('Members')
+                        ->counts('members')
+                        ->badge(),
+                    ]),
+                View::make('filament.table.collapsible-table-row')
+                    ->collapsible(),
             ])
             ->filters([
                 //
@@ -151,21 +158,29 @@ class HouseholdResource extends Resource
                     ->label('Generate ID')
                     ->icon('heroicon-o-identification')
                     ->action(function($records){
-                        $members = Member::whereIn('household_id', $records->pluck('id')->toArray())->get();
-                        $pdfContent = Pdf::view('filament.MemberID', ['members' => $members])
-                            ->format(Format::A4)
-                            ->withBrowsershot(fn (Browsershot $bs) => $bs
-                                ->portrait()
-                                ->noSandbox()
-                                ->setDelay(2000)
-                                ->timeout(60)
-                                ->showBackground()
-                            )
-                            ->base64();
+                        // $members = Member::whereIn('household_id', $records->pluck('id')->toArray())->get();
+                        // $pdfContent = Pdf::view('filament.MemberID', ['members' => $members])
+                        //     ->format(Format::A4)
+                        //     ->withBrowsershot(fn (Browsershot $bs) => $bs
+                        //         ->portrait()
+                        //         ->noSandbox()
+                        //         ->setDelay(2000)
+                        //         ->timeout(60)
+                        //         ->showBackground()
+                        //     )
+                        //     ->base64();
 
-                        return response()->streamDownload(function() use ($pdfContent) {
-                            echo base64_decode($pdfContent);
-                        }, 'member_ids_.pdf');
+                        // return response()->streamDownload(function() use ($pdfContent) {
+                        //     echo base64_decode($pdfContent);
+                        // }, 'member_ids_.pdf');
+
+                        $householdIds = $records->pluck('id')->toArray();
+                        GeneratePDF::dispatch($householdIds);
+
+                    Notification::make()
+                            ->title('PDF Generation')
+                            ->body('Your PDF is being generated and will be available for download shortly.')
+                            ->send();
                     })
             ]
             )

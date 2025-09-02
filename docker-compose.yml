@@ -27,6 +27,22 @@ services:
             - meilisearch
             # - mailpit
             # - selenium
+    queue-listener:
+        image: 'sail-8.4/app'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        working_dir: /var/www/html
+        command: php artisan queue:listen --sleep=3 --tries=3 --timeout=90
+        depends_on:
+            - laravel.test
+            - mysql
+            - redis
+        restart: unless-stopped
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:

@@ -103,7 +103,7 @@ class ListMember extends ManageRelatedRecords
                     ->label('Avatar')
                     ->disk('public')
                     ->circular(),
-                TextColumn::make('full_name')
+                TextColumn::make('fullName')
                     ->label('Name')
                     ->formatStateUsing(fn($state, $record) => $state . ' (' . ($record->role ? $record->role : 'No Role') . ')')
                     ->description(fn($record) => $record->is_leader ? 'Household Leader' : '')

@@ -12,6 +12,10 @@ Route::get('/test', function () {
     return view('welcome');
 });
 
+Route::get('/test-row',function(){
+    return view('filament.table.collapsible-table-row');
+});
+
 Route::get('/test-pdf', function($member = null) {
     $members=Member::take(10)->get();
     return view('filament.MemberID', [

@@ -74,12 +74,14 @@ class Member extends Model
         return $this->belongsTo(Household::class);
     }
 
-    public function getFullNameAttribute(): string
+    public function fullName(): Attribute
     {
-    return trim($this->surname . ', ' .
+        return Attribute::make(
+            get: fn () => trim($this->surname . ', ' .
                 $this->first_name . ' ' .
-               ($this->middle_name ? $this->middle_name . ' ' : '') .
-               ($this->suffix ? $this->suffix : ''));
+                ($this->middle_name ? $this->middle_name . ' ' : '') .
+                ($this->suffix ? $this->suffix : ''))
+        );
     }
 
     public function memberServices(): HasMany
