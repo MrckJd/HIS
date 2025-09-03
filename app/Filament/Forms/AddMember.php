@@ -70,7 +70,6 @@ class AddMember
                     })
                 ->required(),
             Forms\Components\TextInput::make('precinct_no')
-                ->numeric()
                 ->maxLength(255),
             Forms\Components\TextInput::make('cluster_no')
                 ->numeric()

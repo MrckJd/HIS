@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('suffix')->nullable();
             $table->date('birth_date')->nullable();
             $table->string('gender')->nullable();
-            $table->integer('precinct_no')->nullable();
+            $table->string('precinct_no')->nullable();
             $table->string('cluster_no')->nullable();
             $table->foreignUlid('household_id')->constrained('households')->cascadeOnDelete()->cascadeOnUpdate();
             $table->boolean('is_leader')->nullable();

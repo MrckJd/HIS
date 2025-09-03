@@ -9,6 +9,7 @@
         "php": "^8.2",
         "codeat3/blade-fluentui-system-icons": "^1.34",
         "codeat3/blade-simple-icons": "^7.9",
+        "croustibat/filament-jobs-monitor": "^2.6",
         "filament/filament": "^3.3",
         "icetalker/filament-table-repeatable-entry": "^1.1",
         "icetalker/filament-table-repeater": "^1.4",
