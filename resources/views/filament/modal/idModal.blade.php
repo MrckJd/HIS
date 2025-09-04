@@ -11,7 +11,7 @@
 
 @endphp
     <section class="relative w-[3.15in] h-[2.05in] bg-slate-700 bg-cover p-2 rounded-md" style="background-image: url('{{ $backgroundImageSrc }}');">
-        <div class="h-10 text-stone-900 text-center flex flex-col leading-3">
+        <div class="pt-2 h-10 text-stone-900 text-center flex flex-col leading-3">
             <span class="font-bold truncate ">Household {{$member?->is_leader ? 'Leader' : 'Member'}}</span>
             <span class="text-[8px] text-stone-900/70">{{$member->is_leader ? '': '('.$member?->household->leader->full_name.')' }}</span>
         </div>
@@ -22,8 +22,8 @@
             <img class="w-[.8in] h-[.8in]" src="{{ $idCardSrc }}" alt="">
             <div class="flex flex-col justify-between bg-stone-800/50 w-full py-1">
                     <div class="flex flex-col text-shadow-lg text-white leading-2">
-                        <p class="text-md p-0 font-bold drop-shadow-md  leading-3.5">{{$member?->first_name}} {{substr($member?->middle_name, 0, 1)}}. {{$member?->surname}} <br></p>
-                        <span class="text-[7px]">Precinct No.: {{$member->precinct_no}}</span>
+                        <p class="text-md p-0 font-bold drop-shadow-md  leading-4">{{$member?->first_name}} {{substr($member?->middle_name, 0, 1)}}. {{$member?->surname}} <br></p>
+                        <span class="text-[10px]">Precinct No.: {{$member->precinct_no}}</span>
                     </div>
                     <div class="text-[10px] leading-2.5 text-amber-600 mt-1">
                         <p>{{ $address[0] ?? '' }},</p>

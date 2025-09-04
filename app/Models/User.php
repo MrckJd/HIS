@@ -25,6 +25,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
         'role'
     ];
 
@@ -56,6 +57,11 @@ class User extends Authenticatable
         return Attribute::make(
             fn ():string => $this->avatar ?? (new UiAvatarsProvider)->get($this)
         );
+    }
+
+    public function hasActiveAccess() : bool
+    {
+        return $this->is_active;
     }
 
 }

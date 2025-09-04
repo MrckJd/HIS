@@ -22,7 +22,7 @@ class Household extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            $model->user_id = auth()->id();
+            $model->user_id = request()->user()->id;
         });
     }
 

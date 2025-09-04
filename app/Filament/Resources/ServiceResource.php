@@ -24,6 +24,8 @@ class ServiceResource extends Resource
 
     protected static ?string $navigationIcon = 'fas-file-alt';
 
+    protected static ?int $navigationSort = 11;
+
     public static function canAccess(): bool
     {
         return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'provider']);

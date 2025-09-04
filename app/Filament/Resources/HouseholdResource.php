@@ -126,61 +126,51 @@ class HouseholdResource extends Resource
     {
         return $table
             ->columns([
-                Split::make([
-                    TextColumn::make('leader_name')
-                        ->label('Leader')
-                        ->searchable(query: function (Builder $query, string $search): Builder {
-                            return $query->whereHas('leader', function ($q) use ($search) {
-                                $q->where('first_name', 'like', "%{$search}%")
-                                  ->orWhere('middle_name', 'like', "%{$search}%")
-                                  ->orWhere('surname', 'like', "%{$search}%")
-                                  ->orWhere('suffix', 'like', "%{$search}%");
-                            });
-                        }),
-                    TextColumn::make('address')
-                        ->label('Complete Address'),
-                    TextColumn::make('user.name')
-                        ->label('Encoder'),
-                    TextColumn::make('members_count')
-                        ->label('Members')
-                        ->counts('members')
-                        ->badge(),
-                    ]),
-                View::make('filament.table.collapsible-table-row')
-                    ->collapsible(),
+                TextColumn::make('leader_name')
+                    ->label('Leader')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('leader', function ($q) use ($search) {
+                            $q->where('first_name', 'like', "%{$search}%")
+                              ->orWhere('middle_name', 'like', "%{$search}%")
+                              ->orWhere('surname', 'like', "%{$search}%")
+                              ->orWhere('suffix', 'like', "%{$search}%");
+                        });
+                    }),
+                TextColumn::make('address')
+                    ->label('Complete Address'),
+                TextColumn::make('user.name')
+                    ->visible(fn()=>Filament::getCurrentPanel()->getId() == 'admin')
+                    ->label('Encoder'),
+                TextColumn::make('members_count')
+                    ->label('Members')
+                    ->counts('members')
+                    ->badge(),
             ])
-            ->filters([
-                //
-            ])
+            ->modifyQueryUsing(function($query){
+                 if(Filament::getCurrentPanel()->getId() == 'encoder'){
+                    return $query->where('user_id', auth()->id());
+                 }
+                return $query;
+            })
             ->bulkActions([
                 BulkAction::make('mark_selected')
                     ->hidden(fn()=>Filament::getCurrentPanel()->getId() == 'encoder')
                     ->label('Generate ID')
                     ->icon('heroicon-o-identification')
                     ->action(function($records){
-                        // $members = Member::whereIn('household_id', $records->pluck('id')->toArray())->get();
-                        // $pdfContent = Pdf::view('filament.MemberID', ['members' => $members])
-                        //     ->format(Format::A4)
-                        //     ->withBrowsershot(fn (Browsershot $bs) => $bs
-                        //         ->portrait()
-                        //         ->noSandbox()
-                        //         ->setDelay(2000)
-                        //         ->timeout(60)
-                        //         ->showBackground()
-                        //     )
-                        //     ->base64();
-
-                        // return response()->streamDownload(function() use ($pdfContent) {
-                        //     echo base64_decode($pdfContent);
-                        // }, 'member_ids_.pdf');
-
+                        $filename = 'member_ids_' . now()->timestamp . '.pdf';
                         $householdIds = $records->pluck('id')->toArray();
-                        GeneratePDF::dispatch($householdIds);
+                        GeneratePDF::dispatch($householdIds, $filename);
 
                     Notification::make()
                             ->title('PDF Generation')
-                            ->body('Your PDF is being generated and will be available for download shortly.')
+                            ->body('Your ' . $filename . ' is being generated and will be available for download shortly.')
                             ->send();
+
+                    // Notification::make()
+                    //     ->view('filament.notification.generate-pdf-notification', ['filename' => $filename])
+                    //     ->success()
+                    //     ->send();
                     })
             ]
             )

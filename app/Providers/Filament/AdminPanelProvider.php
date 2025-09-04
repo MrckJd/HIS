@@ -5,6 +5,9 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Login\Login;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\MunicipalityChart;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\ServicesPieChart;
+use App\Http\Middleware\Active;
+use Croustibat\FilamentJobsMonitor\FilamentJobsMonitorPlugin;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -36,6 +39,10 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+            ])
+            ->plugins([
+                FilamentJobsMonitorPlugin::make()
+                    ->enableNavigation(fn()=>in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin']))
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
