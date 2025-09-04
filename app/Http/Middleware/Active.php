@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class Active
@@ -16,13 +18,21 @@ class Active
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::user();
+        $user = $request->user();
 
-        if($user && !$user->is_active) {
-            Auth::logout();
-            return redirect()->route('login')->with('error', 'Your account is deactivated. Please contact the administrator.');
+        if( $user && ! $user->hasActiveAccess() ) {
+            Filament::auth()->logout();
+
+            $this->throwFailureValidationException();
         }
 
         return $next($request);
+    }
+
+    protected function throwFailureValidationException(): never
+    {
+        throw ValidationException::withMessages([
+            'data.email' => 'Your account is inactive. Please contact the administrator.',
+        ]);
     }
 }

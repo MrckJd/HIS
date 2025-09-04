@@ -59,4 +59,9 @@ class User extends Authenticatable
         );
     }
 
+    public function hasActiveAccess() : bool
+    {
+        return $this->is_active;
+    }
+
 }

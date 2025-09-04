@@ -7,6 +7,7 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Pages\Auth\Login as AuthLogin;
+use Illuminate\Validation\ValidationException;
 
 class Login extends AuthLogin
 {
@@ -41,5 +42,12 @@ class Login extends AuthLogin
         session()->regenerate();
 
         return app(LogInResponse::class);
+    }
+
+    protected function throwFailureValidationException(): never
+    {
+        throw ValidationException::withMessages([
+            'data.email' => __('filament-panels::pages/auth/login.messages.failed'),
+        ]);
     }
 }
