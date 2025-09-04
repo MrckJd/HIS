@@ -68,9 +68,6 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('role')
                     ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->label('Active')
-                    ->onColor('success')
-                    ->offColor('danger'),
             ])
             ->filters([
                 //

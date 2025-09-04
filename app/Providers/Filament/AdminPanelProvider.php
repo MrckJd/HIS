@@ -61,7 +61,6 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Active::class,
                 Authenticate::class,
             ])
             ->spa();

@@ -53,7 +53,6 @@ class ServiceProviderPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Active::class,
                 Authenticate::class,
             ]);
     }
