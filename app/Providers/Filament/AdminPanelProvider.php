@@ -3,9 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Login\Login;
+use App\Filament\Panel\Page\Auth\Profile;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\MunicipalityChart;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\ServicesPieChart;
-use App\Http\Middleware\Active;
 use Croustibat\FilamentJobsMonitor\FilamentJobsMonitorPlugin;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('')
             ->login(Login::class)
+            ->profile(Profile::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -62,8 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->spa();
+            ]);
 
     }
 }

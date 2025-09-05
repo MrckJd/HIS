@@ -5,7 +5,9 @@ namespace App\Filament\Pages;
 use App\Enum\UserRole;
 use App\Models\Household;
 use App\Filament\Services\PSGCService;
+use App\Models\Barangay;
 use App\Models\Member;
+use App\Models\Municipality;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Database\Eloquent\Builder;
@@ -198,14 +200,14 @@ class DataFilter extends Page implements HasTable
                     ->form([
                         \Filament\Forms\Components\Select::make('municipality')
                             ->label('Municipality')
-                            ->options(PSGCService::getMunicipalities())
+                            ->options(Municipality::orderBy('name')->pluck('name', 'code'))
                             ->searchable()
                             ->preload(),
                         \Filament\Forms\Components\Select::make('barangay')
                             ->label('Barangay')
                             ->options(function (callable $get) {
                                 $municipality = $get('municipality') ?? '';
-                                return PSGCService::getBarangays($municipality);
+                                return Barangay::where('municipality_code', $municipality)->orderBy('name')->pluck('name', 'code');
                             })
                             ->searchable()
                             ->preload(),
@@ -222,10 +224,10 @@ class DataFilter extends Page implements HasTable
                     ->indicateUsing(function (array $data) {
                         $indicators = [];
                         if (filled($data['municipality'] ?? null)) {
-                            $indicators[] = 'Municipality: ' . PSGCService::getMunicipalityName($data['municipality']);
+                            $indicators[] = 'Municipality: ' . Municipality::where('code', $data['municipality'])->value('name');
                         }
                         if ((filled($data['barangay'] ?? null)) && (filled($data['municipality'] ?? null))) {
-                            $indicators[] = 'Barangay: ' . PSGCService::getBarangayName($data['barangay'], $data['municipality']);
+                            $indicators[] = 'Barangay: ' . Barangay::where('code', $data['barangay'])->value('name');
                         }
                         return $indicators;
                     }),

@@ -147,6 +147,7 @@ class HouseholdResource extends Resource
                     ->counts('members')
                     ->badge(),
             ])
+            ->deferLoading()
             ->modifyQueryUsing(function($query){
                  if(Filament::getCurrentPanel()->getId() == 'encoder'){
                     return $query->where('user_id', request()->user()->id);
