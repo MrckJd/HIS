@@ -8,6 +8,7 @@ use App\Filament\Services\PSGCService;
 use App\Jobs\GeneratePDF;
 use App\Models\Household;
 use App\Models\Member;
+use App\Models\Municipality;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Repeater;
@@ -64,7 +65,7 @@ class HouseholdResource extends Resource
                                             ->searchable('name')
                                             ->reactive()
                                             ->searchPrompt('Search municipalities...')
-                                            ->options(fn() => PSGCService::getMunicipalities()),
+                                            ->options(Municipality::orderBy('name')->pluck('name', 'code')),
                                         Forms\Components\Select::make('baranggay')
                                             ->live()
                                             ->loadingMessage('Loading branggays...')
@@ -74,10 +75,10 @@ class HouseholdResource extends Resource
                                             ->required()
                                             ->options(function($get){
                                                 $municipality = $get('municipality');
-                                                if (!$municipality) {
-                                                    return [];
+                                                if(!$municipality){
+                                                    return Municipality::orderBy('name')->first()?->barangays()->orderBy('name')->pluck('name', 'code') ?? [];
                                                 }
-                                                return PSGCService::getBarangays($municipality);
+                                                return Municipality::where('code', $municipality)->first()?->barangays()->orderBy('name')->pluck('name', 'code') ?? [];
                                             }),
                                         Forms\Components\TextInput::make('purok')
                                             ->label('Purok / Sitio')
@@ -148,7 +149,7 @@ class HouseholdResource extends Resource
             ])
             ->modifyQueryUsing(function($query){
                  if(Filament::getCurrentPanel()->getId() == 'encoder'){
-                    return $query->where('user_id', auth()->id());
+                    return $query->where('user_id', request()->user()->id);
                  }
                 return $query;
             })
@@ -160,17 +161,13 @@ class HouseholdResource extends Resource
                     ->action(function($records){
                         $filename = 'member_ids_' . now()->timestamp . '.pdf';
                         $householdIds = $records->pluck('id')->toArray();
+
                         GeneratePDF::dispatch($householdIds, $filename);
 
-                    Notification::make()
+                        Notification::make()
                             ->title('PDF Generation')
                             ->body('Your ' . $filename . ' is being generated and will be available for download shortly.')
                             ->send();
-
-                    // Notification::make()
-                    //     ->view('filament.notification.generate-pdf-notification', ['filename' => $filename])
-                    //     ->success()
-                    //     ->send();
                     })
             ]
             )

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Cache;
 
 class PSGCService
 {
+
+    public static string $provinceCode = '112400000' ;
+
     public static function getMunicipalities(string $provinceCode = '112400000'): array
     {
         return Cache::remember("municipalities_{$provinceCode}", now()->addDay(), function() use ($provinceCode) {

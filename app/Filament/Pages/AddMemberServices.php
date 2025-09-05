@@ -33,7 +33,7 @@ class AddMemberServices extends Page implements HasTable
     use InteractsWithTable;
     protected static ?string $model = Member::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'gmdi-medical-services-o';
 
     protected static string $view = 'filament.pages.add-member-services';
 
