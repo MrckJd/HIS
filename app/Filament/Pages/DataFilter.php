@@ -207,7 +207,7 @@ class DataFilter extends Page implements HasTable
                             ->label('Barangay')
                             ->options(function (callable $get) {
                                 $municipality = $get('municipality') ?? '';
-                                return Barangay::where('municipality_code', $municipality)->orderBy('name')->pluck('name', 'code');
+                                return Municipality::find($municipality)?->barangays()->orderBy('name')->pluck('name', 'code') ?? [];
                             })
                             ->searchable()
                             ->preload(),
