@@ -56,6 +56,7 @@ class GeneratedPdfResource extends Resource
                     ->since()
                     ->sortable(),
             ])
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('name', '!=', 'SyncAddress'))
             ->defaultSort  ('started_at', 'desc')
             ->filters([
                 //

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\DashBoardWidgetResource\Widgets;
 use App\Filament\Services\PSGCService;
 use App\Models\Household;
 use App\Models\Member;
+use App\Models\Municipality;
 use Filament\Widgets\ChartWidget;
 
 class MunicipalityChart extends ChartWidget
@@ -13,28 +14,27 @@ class MunicipalityChart extends ChartWidget
 
     protected function getData(): array
     {
-        // Fetching the count of members in each municipality
+        $municipalities = Municipality::query()->orderBy('name')->get();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($municipalities as $municipality) {
+            $labels[] = $municipality->name;
+            $householdIds = Household::where('municipality', $municipality->code)->pluck('id');
+            $data[] = Member::whereIn('household_id', $householdIds)->count();
+        }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Population by Municipality',
-                    'data' => [
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Bansalan'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Hagonoy'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Kiblawan'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Magsaysay'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Malalag'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Matanao'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Padada'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Santa Cruz'))->pluck('id'))->count(),
-                        Member::whereIn('household_id', Household::where('municipality', PSGCService::getMunicipalityCode('Sulop'))->pluck('id'))->count(),
-                    ],
+                    'data' => $data,
                     'backgroundColor' => '#36A2EB',
                     'borderColor' => '#9BD0F5',
                 ],
             ],
-            'labels' => ['Bansalan', 'Hagonoy', 'Kiblawan', 'Magsaysay', 'Malalag', 'Matanao', 'Padada', 'Santa Cruz', 'Sulop'],
+            'labels' => $labels,
         ];
     }
 
