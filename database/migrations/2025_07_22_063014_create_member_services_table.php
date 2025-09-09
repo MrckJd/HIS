@@ -15,7 +15,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignUlid('member_id')->constrained('members')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignUlid('service_id')->constrained('services')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignUlid('user_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->dateTime('date_received');
             $table->timestamps();
         });

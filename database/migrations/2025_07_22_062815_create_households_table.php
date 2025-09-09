@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('households', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('municipality');
-            $table->string('baranggay');
+            $table->string('barangay');
             $table->string('purok');
             $table->foreignUlId('user_id')->nullable()->constrained('users')->nullOnDelete()->cascadeOnUpdate();
             $table->string('address')->nullable();

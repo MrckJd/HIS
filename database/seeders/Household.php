@@ -39,7 +39,7 @@ class Household extends Seeder
 
             $household = ModelsHousehold::create([
                 'municipality' => $municipality->code,
-                'baranggay' => $barangay->code,
+                'barangay' => $barangay->code,
                 'purok' => 'Purok ' . fake()->numberBetween(1, 10),
                 'user_id' => User::inRandomOrder()->first()->id,
                 'address' => $municipality->name . ', ' . $barangay->name . ', Purok ' . fake()->numberBetween(1, 10) . ', Street ' . fake()->numberBetween(1, 100),

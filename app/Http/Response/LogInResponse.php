@@ -20,7 +20,7 @@ class LogInResponse implements Responsable
             UserRole::ADMIN->value=> 'filament.admin.pages.dashboard',
             UserRole::PROVIDER->value=> 'filament.serviceProvider.pages.dashboard',
             UserRole::ENCODER->value=> 'filament.encoder.pages.dashboard',
-            default => 'filament.auth.login',
+            default => 'filament.admin.auth.login',
 
         };
 
