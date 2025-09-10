@@ -5,6 +5,7 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 use App\Enum\UserRole;
 use App\Filament\Resources\HouseholdResource;
 use Filament\Actions;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\EditRecord;
 
 class EditHousehold extends EditRecord
@@ -15,7 +16,7 @@ class EditHousehold extends EditRecord
     {
         return [
             Actions\DeleteAction::make()
-                ->visible(fn ($record) => auth()->check() && (auth()->user()->role === UserRole::ADMIN->getLabel() || auth()->user()->role === UserRole::ROOT->getLabel()))
+                ->visible(fn() => in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin']))
                 ->successNotificationTitle('Household deleted successfully.'),
         ];
     }

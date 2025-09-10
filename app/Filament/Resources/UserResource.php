@@ -4,16 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Enum\UserRole;
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Municipality;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -39,18 +41,60 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('contact_number')
+                    ->label('Contact Number')
+                    ->required()
+                    ->prefix('+63 ')
+                    ->suffixIcon('heroicon-o-phone')
+                    ->mask('99 9999 9999')
+                    ->placeholder('9XX XXX XXXX')
+                    ->mutateDehydratedStateUsing(fn ($state) => str_replace(' ', '', $state)),
                 Forms\Components\Select::make('role')
                     ->options(UserRole::options())
                     ->required()
                     ->native(false),
-                Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('retype_password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
+                Section::make('Address')
+                    ->description('This address will be used for identification and contact purposes.')
+                    ->columns(['sm' => 1, 'md' => 3])
+                    ->schema([
+                        Forms\Components\Select::make('municipality')
+                            ->required()
+                            ->native(false)
+                            ->loadingMessage('Loading municipalities...')
+                            ->noSearchResultsMessage('No Municipalities found.')
+                            ->searchable('name')
+                            ->searchPrompt('Search municipalities...')
+                            ->options(Municipality::orderBy('name')->pluck('name', 'code')),
+                        Forms\Components\Select::make('barangay')
+                            ->label('Barangay')
+                            ->options(function($get){
+                                $municipality = $get('municipality');
+                                if(!$municipality){
+                                    return [];
+                                }
+                                return Municipality::where('code', $municipality)->first()?->barangays()->pluck('name', 'code') ?? [];
+                            })
+                            ->required()
+                            ->native(false),
+                        Forms\Components\TextInput::make('purok')
+                            ->label('Purok')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+                Section::make('Password')
+                    ->visible(fn (Forms\Get $get) => !$get('id'))
+                    ->description('Set the password for the user.')
+                    ->columns(['sm' => 1, 'md' => 2])
+                    ->schema([
+                        Forms\Components\TextInput::make('password')
+                            ->password()
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('retype_password')
+                            ->password()
+                            ->required()
+                            ->maxLength(255),
+                    ]),
             ]);
     }
 
@@ -74,6 +118,41 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Action::make('change_password')
+                        ->label('Change Password')
+                        ->form([
+                            Forms\Components\TextInput::make('password')
+                                ->password()
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('retype_password')
+                                ->password()
+                                ->required()
+                                ->maxLength(255),
+                        ])
+                        ->action(function (User $record, array $data): void {
+                            if ($data['password'] !== $data['retype_password']) {
+                                Notification::make()
+                                    ->title('Password did not match.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            $record->update([
+                                'password' => bcrypt($data['password']),
+                            ]);
+                            Notification::make()
+                                ->title('Password changed successfully.')
+                                ->success()
+                                ->send();
+                        })
+                        ->color('warning')
+                        ->icon('heroicon-o-key')
+                        ->requiresConfirmation()
+                        ->slideOver(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
             ]);

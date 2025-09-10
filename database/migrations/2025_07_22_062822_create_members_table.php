@@ -21,11 +21,12 @@ return new class extends Migration
             $table->string('middle_name')->nullable();
             $table->string('suffix')->nullable();
             $table->date('birth_date')->nullable();
-            $table->string('gender')->nullable();
+            $table->string('sex')->nullable();
             $table->string('precinct_no')->nullable();
             $table->string('cluster_no')->nullable();
             $table->foreignUlid('household_id')->constrained('households')->cascadeOnDelete()->cascadeOnUpdate();
             $table->boolean('is_leader')->nullable();
+            $table->string('status')->default('Active');
             $table->timestamps();
         });
     }

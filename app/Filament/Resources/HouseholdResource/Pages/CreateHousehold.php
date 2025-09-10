@@ -4,8 +4,10 @@ namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Resources\HouseholdResource;
 use App\Filament\Services\PSGCService;
+use App\Models\Barangay;
 use App\Models\Household;
 use App\Models\MemberServices;
+use App\Models\Municipality;
 use Exception;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -23,43 +25,9 @@ class CreateHousehold extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
-    public function handleRecordCreation($data): Model
-    {
-
-            DB::beginTransaction();
-
-        try {
-            $household = Household::create($data);
-
-            if (isset($data['members'])) {
-                foreach ($data['members'] as $memberData) {
-                    $memberData['household_id'] = $household->id;
-                    $member = $household->members()->create($memberData);
-
-                    if (isset($memberData['memberServices'])) {
-                        foreach ($memberData['memberServices'] as $service) {
-                            MemberServices::create([
-                                'member_id' => $member->id,
-                                'service_id' => $service['service_id'],
-                                'date_received' => $service['date_received'],
-                            ]);
-                        }
-                    }
-                }
-            }
-            DB::commit();
-            return $household;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-
-
-    }
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['address'] = $data['purok'] . ', ' . PSGCService::getBarangayName($data['baranggay'], $data['municipality']) . ', ' . PSGCService::getMunicipalityName($data['municipality']);
+        $data['address'] = $data['purok'] . ', ' . Barangay::query()->where('code', $data['barangay'])->value('name') . ', ' . Municipality::query()->where('code', $data['municipality'])->value('name');
         return $data;
     }
 

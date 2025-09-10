@@ -14,7 +14,7 @@ class Household extends Model
 
     protected $fillable = [
         'municipality',
-        'baranggay',
+        'barangay',
         'purok',
         'address',
     ];

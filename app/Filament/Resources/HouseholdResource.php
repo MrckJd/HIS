@@ -63,12 +63,11 @@ class HouseholdResource extends Resource
                                             ->loadingMessage('Loading municipalities...')
                                             ->noSearchResultsMessage('No Municipalities found.')
                                             ->searchable('name')
-                                            ->reactive()
                                             ->searchPrompt('Search municipalities...')
                                             ->options(Municipality::orderBy('name')->pluck('name', 'code')),
-                                        Forms\Components\Select::make('baranggay')
-                                            ->live()
+                                        Forms\Components\Select::make('barangay')
                                             ->loadingMessage('Loading branggays...')
+                                            ->reactive()
                                             ->noSearchResultsMessage('No Baranggays found.')
                                             ->searchable('name')
                                             ->native(false)
@@ -76,9 +75,9 @@ class HouseholdResource extends Resource
                                             ->options(function($get){
                                                 $municipality = $get('municipality');
                                                 if(!$municipality){
-                                                    return Municipality::orderBy('name')->first()?->barangays()->orderBy('name')->pluck('name', 'code') ?? [];
+                                                    return [];
                                                 }
-                                                return Municipality::where('code', $municipality)->first()?->barangays()->orderBy('name')->pluck('name', 'code') ?? [];
+                                                return Municipality::where('code', $municipality)->first()?->barangays()->pluck('name', 'code') ?? [];
                                             }),
                                         Forms\Components\TextInput::make('purok')
                                             ->label('Purok / Sitio')
