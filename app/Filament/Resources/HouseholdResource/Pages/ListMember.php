@@ -8,7 +8,6 @@ use App\Filament\Actions\Table\ViewIdAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Service;
-use BladeUI\Icons\Components\Icon;
 use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -67,18 +66,7 @@ class ListMember extends ManageRelatedRecords
                                                 ->schema([
                                                     Select::make('service_id')
                                                         ->label('Service')
-                                                        ->options(function($get) {
-                                                            $allSelectedServices = collect($get('../../members.member_services'))
-                                                                ->pluck('service_id')
-                                                                ->filter()
-                                                                ->toArray();
-                                                            $currentServiceId = $get('service_id');
-                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
-                                                            return Service::whereNotIn('id', $excludedServices)
-                                                                ->pluck('name', 'id')
-                                                                ->toArray();
-                                                        })
-                                                        ->live()
+                                                        ->options(fn()=>Service::pluck('name','id')->toArray())
                                                         ->searchable(),
                                                     DatePicker::make('date_received')
                                                         ->label('Date Received'),
@@ -181,18 +169,7 @@ class ListMember extends ManageRelatedRecords
                                                 ->schema([
                                                     Select::make('service_id')
                                                         ->label('Service')
-                                                        ->options(function($get) {
-                                                            $allSelectedServices = collect($get('../../members.member_services'))
-                                                                ->pluck('service_id')
-                                                                ->filter()
-                                                                ->toArray();
-                                                            $currentServiceId = $get('service_id');
-                                                            $excludedServices = array_diff($allSelectedServices, [$currentServiceId]);
-                                                            return Service::whereNotIn('id', $excludedServices)
-                                                                ->pluck('name', 'id')
-                                                                ->toArray();
-                                                        })
-                                                        ->live()
+                                                        ->options(fn()=>Service::pluck('name','id')->toArray())
                                                         ->searchable()
                                                         ->required(),
                                                     DatePicker::make('date_received')
@@ -204,6 +181,7 @@ class ListMember extends ManageRelatedRecords
                             ]),
                     Action::make('delete')
                         ->icon('heroicon-o-trash')
+                        ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn($record) => $record->delete())
                         ->successNotificationTitle('Member deleted successfully'),

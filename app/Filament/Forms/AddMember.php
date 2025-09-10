@@ -43,11 +43,12 @@ class AddMember
                 ->maxLength(255),
             Forms\Components\DatePicker::make('birth_date')
                 ->required(),
-            Forms\Components\Select::make('gender')
+            Forms\Components\Select::make('sex')
                 ->options([
                     'Male' => 'Male',
                     'Female' => 'Female',
                 ])
+                ->native(false)
                 ->required(),
             Forms\Components\Select::make('role')
                 ->label('Relationship')
