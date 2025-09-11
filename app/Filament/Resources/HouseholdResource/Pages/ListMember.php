@@ -3,19 +3,20 @@
 namespace App\Filament\Resources\HouseholdResource\Pages;
 
 use App\Filament\Actions\BackAction;
+use App\Filament\Actions\Table\DeleteMemberAction;
 use App\Filament\Actions\Table\IsLeaderAction;
 use App\Filament\Actions\Table\ViewIdAction;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource;
 use App\Models\Service;
 use Filament\Actions;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
@@ -31,7 +32,7 @@ class ListMember extends ManageRelatedRecords
 {
     protected static string $resource = HouseholdResource::class;
 
-    protected static string $relationship = 'listmembers';
+    protected static string $relationship = 'members';
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
@@ -59,6 +60,7 @@ class ListMember extends ManageRelatedRecords
                                         ->columns(3)
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
+                                        ->hidden(fn()=>!in_array(Filament::getCurrentPanel()->getId(), ['root','admin','provider']))
                                         ->schema([TableRepeater::make('memberServices')
                                                 ->columnSpanFull()
                                                 ->defaultItems(1)
@@ -160,6 +162,7 @@ class ListMember extends ManageRelatedRecords
                                         ->columns(3)
                                         ->schema(AddMember::form()),
                                     Tab::make('Services')
+                                        ->hidden(fn()=>!in_array(Filament::getCurrentPanel()->getId(), ['root','admin','provider']))
                                         ->schema([
                                             TableRepeater::make('members.memberServices')
                                                 ->relationship('memberServices')
@@ -179,12 +182,7 @@ class ListMember extends ManageRelatedRecords
                                         ]),
                                 ]),
                             ]),
-                    Action::make('delete')
-                        ->icon('heroicon-o-trash')
-                        ->color('danger')
-                        ->requiresConfirmation()
-                        ->action(fn($record) => $record->delete())
-                        ->successNotificationTitle('Member deleted successfully'),
+                    DeleteMemberAction::make(),
                 ])
             ]);
     }

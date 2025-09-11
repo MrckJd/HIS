@@ -27,6 +27,8 @@ class ViewIdAction extends Action
 
         $this->modalCancelAction(false);
 
+        $this->hidden(fn()=>!in_array(\Filament\Facades\Filament::getCurrentPanel()->getId(), ['root','admin']));
+
         $this->modalContent(function ($record) {
             $url = url('id-preview', ['member' => $record->id]);
 

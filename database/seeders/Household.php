@@ -56,7 +56,7 @@ class Household extends Seeder
                     'surname' => fake()->lastName(),
                     'suffix' => fake()->randomElement(['Jr.', 'Sr.', 'III', null]),
                     'birth_date' => fake()->date(),
-                    'gender' => fake()->randomElement(['male', 'female']),
+                    'sex' => fake()->randomElement(['male', 'female']),
                     'precinct_no' => fake()->numberBetween(1, 100),
                     'cluster_no' => fake()->numberBetween(1, 50),
                     'is_leader' => $j === 1,

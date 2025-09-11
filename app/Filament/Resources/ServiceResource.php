@@ -24,7 +24,7 @@ class ServiceResource extends Resource
 
     protected static ?string $navigationIcon = 'fas-file-alt';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

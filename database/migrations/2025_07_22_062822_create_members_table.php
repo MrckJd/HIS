@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('cluster_no')->nullable();
             $table->foreignUlid('household_id')->constrained('households')->cascadeOnDelete()->cascadeOnUpdate();
             $table->boolean('is_leader')->nullable();
-            $table->string('status')->default('Active');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
