@@ -59,7 +59,7 @@ class DataFilter extends Page implements HasTable
                         $record->surname . ', ' . $record->first_name . ' ' . $record->middle_name
                     ))
                     ->searchable(['first_name', 'surname']),
-                TextColumn::make('gender')
+                TextColumn::make('sex')
                     ->badge(),
                 TextColumn::make('household.address')
                     ->label('Complete Address')

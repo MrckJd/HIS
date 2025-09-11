@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Filament\AvatarProviders\UiAvatarsProvider;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -66,6 +67,11 @@ class User extends Authenticatable
     public function hasActiveAccess() : bool
     {
         return $this->is_active;
+    }
+
+    public function requestActions() : HasMany
+    {
+        return $this->hasMany(RequestAction::class);
     }
 
 }

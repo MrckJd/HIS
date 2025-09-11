@@ -110,7 +110,7 @@ class HouseholdResource extends Resource
                                 Repeater::make('members')
                                     ->relationship('members')
                                     ->columnspanFull()
-                                    ->defaultItems(0)
+                                    ->defaultItems(3)
                                     ->collapsible()
                                     ->itemLabel(fn($state) => $state['first_name'] . ' ' . $state['surname'])
                                     ->columns(3)

@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Member extends Model
 {
-    use HasUlids;
+    use HasUlids, SoftDeletes;
 
     protected $fillable = [
         'household_id',
@@ -92,6 +93,11 @@ class Member extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'member_services');
+    }
+
+    public function requestActions() : HasMany
+    {
+        return $this->hasMany(RequestAction::class);
     }
 
 }
