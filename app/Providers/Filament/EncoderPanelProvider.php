@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\MunicipalityChart;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\ServicesPieChart;
 use App\Http\Middleware\Active;
+use App\Http\Middleware\CheckUserPanel;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -46,6 +47,7 @@ class EncoderPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
+                CheckUserPanel::class,
                 Authenticate::class,
             ]);
     }
