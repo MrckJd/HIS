@@ -6,6 +6,7 @@ use App\Filament\Pages\Login\Login;
 use App\Filament\Panel\Page\Auth\Profile;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\MunicipalityChart;
 use App\Filament\Resources\DashBoardWidgetResource\Widgets\ServicesPieChart;
+use App\Http\Middleware\CheckUserPanel;
 use Croustibat\FilamentJobsMonitor\FilamentJobsMonitorPlugin;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -62,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
+                CheckUserPanel::class,
                 Authenticate::class,
             ]);
 

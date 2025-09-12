@@ -4,10 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
-use App\Filament\Services\PSGCService;
 use App\Jobs\GeneratePDF;
 use App\Models\Household;
-use App\Models\Member;
 use App\Models\Municipality;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -23,14 +21,9 @@ use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Columns\Layout\Split;
-use Filament\Tables\Columns\Layout\View;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\Browsershot\Browsershot;
-use Spatie\LaravelPdf\Enums\Format;
-use Spatie\LaravelPdf\Facades\Pdf;
 
 class HouseholdResource extends Resource
 {

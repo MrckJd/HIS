@@ -10,6 +10,8 @@ class LogOutResponse implements Responsable
 {
     public function toResponse($request): RedirectResponse|Redirector
     {
+        $request->session()->flush();
+
         return redirect()->route('filament.admin.auth.login');
     }
 }
