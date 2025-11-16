@@ -29,6 +29,7 @@ class CheckUserPanel
                 UserRole::ADMIN->value=> 'filament.admin.pages.dashboard',
                 UserRole::PROVIDER->value=> 'filament.serviceProvider.pages.dashboard',
                 UserRole::ENCODER->value=> 'filament.encoder.home',
+                UserRole::SUPERVISOR->value => 'filament.supervisor.pages.dashboard',
                 default => 'filament.admin.auth.login',
 
             };

@@ -8,6 +8,7 @@ use App\Models\Municipality;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -16,6 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -53,7 +55,43 @@ class UserResource extends Resource
                 Forms\Components\Select::make('role')
                     ->options(UserRole::options())
                     ->required()
-                    ->native(false),
+                    ->native(false)
+                    ->live(),
+                Section::make('Area of Responsibility')
+                    ->description("This will be the area of resposibility of the user's.")
+                    ->hidden(fn($get) => $get('role') !== UserRole::SUPERVISOR->value)
+                    ->schema([
+                        Repeater::make('address')
+                            ->columns(['sm' => 1, 'md' => 3])
+                            ->reorderable(false)
+                            ->schema([
+                                Forms\Components\Select::make('municipality')
+                                    ->required()
+                                    ->native(false)
+                                    ->loadingMessage('Loading municipalities...')
+                                    ->noSearchResultsMessage('No Municipalities found.')
+                                    ->searchable('name')
+                                    ->searchPrompt('Search municipalities...')
+                                    ->options(Municipality::orderBy('name')->pluck('name', 'code'))
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                                Forms\Components\Select::make('barangay')
+                                    ->label('Barangay')
+                                    ->options(function($get){
+                                        $municipality = $get('municipality');
+                                        if(!$municipality){
+                                            return [];
+                                        }
+                                        return Municipality::where('code', $municipality)->first()?->barangays()->pluck('name', 'code') ?? [];
+                                    })
+                                    ->required()
+                                    ->native(false)
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                                Forms\Components\TextInput::make('purok')
+                                    ->label('Purok')
+                                    ->required()
+                                    ->maxLength(255),
+                            ])
+                    ]),
                 Section::make('Address')
                     ->description('This address will be used for identification and contact purposes.')
                     ->columns(['sm' => 1, 'md' => 3])
@@ -154,16 +192,14 @@ class UserResource extends Resource
                         ->slideOver(),
                     Tables\Actions\DeleteAction::make(),
                 ])
-            ])
-            ->bulkActions([
             ]);
     }
 
-    public static function getRelations(): array
+    public static function getEloquentQuery(): Builder
     {
-        return [
-            //
-        ];
+        return parent::getEloquentQuery()
+            ->where('id', '!=', request()->user()->id)
+            ->where('role','!=','root');
     }
 
     public static function getPages(): array

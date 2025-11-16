@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\UserRole;
 use App\Filament\Forms\AddMember;
 use App\Filament\Resources\HouseholdResource\Pages;
 use App\Jobs\GeneratePDF;
@@ -33,7 +34,7 @@ class HouseholdResource extends Resource
 
     public static function canAccess(): bool
     {
-        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'encoder']);
+        return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'encoder', 'supervisor']);
     }
 
     public static function form(Form $form): Form
@@ -104,6 +105,8 @@ class HouseholdResource extends Resource
                                     ->relationship('members')
                                     ->columnspanFull()
                                     ->defaultItems(3)
+                                    ->minItems(3)
+                                    ->maxItems(5)
                                     ->collapsible()
                                     ->itemLabel(fn($state) => $state['first_name'] . ' ' . $state['surname'])
                                     ->columns(3)
@@ -165,10 +168,11 @@ class HouseholdResource extends Resource
             ]
             )
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn()=>Filament::getCurrentPanel()->getId()== UserRole::SUPERVISOR->value),
                 ActionGroup::make([
                     DeleteAction::make()
-                        ->hidden(fn()=>Filament::getCurrentPanel()->getId() == 'encoder')
+                        ->hidden(fn()=> in_array(Filament::getCurrentPanel()->getId(),['encoder','supervisor']))
                 ])
             ])
             ->recordAction(null)

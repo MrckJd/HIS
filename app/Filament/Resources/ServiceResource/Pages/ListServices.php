@@ -20,7 +20,6 @@ class ListServices extends ListRecords
     {
         return [
             CreateServiceAction::make('create')
-                ->icon('heroicon-o-plus')
                 ->label('Add Service'),
         ];
     }

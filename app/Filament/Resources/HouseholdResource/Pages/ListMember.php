@@ -154,6 +154,7 @@ class ListMember extends ManageRelatedRecords
                     EditAction::make('edit')
                         ->icon('heroicon-o-pencil')
                         ->modalWidth(MaxWidth::FourExtraLarge)
+                        ->hidden(fn()=>Filament::getCurrentPanel()->getId()==='supervisor')
                         ->form([
                             Tabs::make('Member Details')
                                 ->contained(false)

@@ -12,6 +12,8 @@ enum UserRole: string
 
     case PROVIDER = 'service provider';
 
+    case SUPERVISOR = 'supervisor';
+
     public function getLabel(): ?string
     {
         return match ($this) {
