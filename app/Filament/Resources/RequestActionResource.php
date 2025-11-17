@@ -8,6 +8,7 @@ use App\Filament\Actions\Table\CancelDeleteMemberAction;
 use App\Filament\Actions\Table\RejectDeleteAction;
 use App\Filament\Resources\RequestActionResource\Pages;
 use App\Models\RequestAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,6 +23,11 @@ class RequestActionResource extends Resource
     protected static ?string $navigationIcon = 'gmdi-call-to-action-o';
 
     protected static ?int $navigationSort = 5;
+
+    public static function canAccess(): bool
+    {
+         return in_array(Filament::getCurrentPanel()->getId(), ['root', 'admin', 'encoder']);
+    }
 
     public static function form(Form $form): Form
     {

@@ -65,7 +65,9 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 CheckUserPanel::class,
                 Authenticate::class,
-            ]);
+            ])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('60s');
 
     }
 }
